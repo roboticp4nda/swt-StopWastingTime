@@ -1,0 +1,22 @@
+#swt-overlay {
+    background-color: #202124;
+    color: #bdc1c6;
+    height: 100%;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    z-index: 999 !important;
+}
+#swt-overlay-text {
+    font-weight: bold;
+    font-size: x-large;
+    padding-top: 25%;
+}
+#swt-timer {
+    border: 1px solid;
+    width: 10%;
+    position: fixed;
+    right: 0px;
+    top: 200px;
+    z-index: 999 !important;
+}
