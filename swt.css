@@ -1,17 +1,21 @@
-#swt-overlay {
+#swt-blocking-overlay {
     background-color: #202124;
     color: #bdc1c6;
     height: 100%;
     position: absolute;
     text-align: center;
     width: 100%;
-    z-index: 999 !important;
+    z-index: 99999 !important;
+    top: 0;
+    left: 0;
 }
-#swt-overlay-text {
+
+.swt-blocking-overlay-text {
     font-weight: bold;
-    font-size: x-large;
-    padding-top: 25%;
+    font-size: 3em;
+    padding-top: 20%;
 }
+
 #swt-timer {
     border: 1px solid;
     width: 10%;
