@@ -2,7 +2,7 @@
     background-color: #202124;
     color: #bdc1c6;
     height: 100%;
-    position: absolute;
+    position: fixed;
     text-align: center;
     width: 100%;
     z-index: 99999 !important;
@@ -14,6 +14,10 @@
     font-weight: bold;
     font-size: 3em;
     padding-top: 20%;
+}
+
+.swt-blocking-hide-overflow {
+    overflow: hidden;
 }
 
 #swt-timer {

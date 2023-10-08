@@ -1,5 +1,5 @@
 const UPDATE_INTERVAL_SECONDS = 1;
-let timer;
+let timer = null;
 let timeLeftSeconds;
 let activeTabId;
 let intervalLastFireDate;
@@ -20,19 +20,55 @@ browser.runtime.onMessage.addListener(
 )
 
 
-/* When the tab changes (new URL or new tab) */
+/* When the tab gets updated (e.g. navigation) */
 browser.tabs.onUpdated.addListener(
-    function(tabId, _changeInfo, tabInfo) {
-        activeTabId = tabId;
-        if (tabInfo.status === 'complete') {
-            startTimer(4, 1337)
+    function(_tabId, _changeInfo, tabInfo) {
+        console.log(tabInfo);
+        tabHandler();
+    }
+)
+
+/* When a new tab gets focus */
+browser.tabs.onActivated.addListener(
+    function (_activeInfo) {
+        tabHandler();
+    }
+)
+
+/* When a new window gets focus*/
+browser.windows.onFocusChanged.addListener(
+    function() {
+        tabHandler();
+    }
+)
+
+/* Main flow for new and updated tabs */
+function tabHandler() {
+    browser.tabs.query({currentWindow: true, active: true})
+        .then((tabs) => {
+            let rule = getRuleByUrl(tabs[0].url);
+            activeTabId = tabs[0].id;
+
+            // Inject our CSS into the currently active tab
             browser.scripting.insertCSS({
                 files: ['swt.css'],
                 target: {tabId: activeTabId}
             })
-        }
-    }
-)
+
+            // No rule for this website, no action needed
+            if (!rule) {
+                return;
+            }
+
+            if (rule.timeLeft > 0) {
+                removeBlockingOverlay();
+                startTimer(rule.timeLeft, rule.id);
+            }
+            else {
+                createBlockingOverlay();
+            }
+        })
+}
 
 function startTimer(seconds, ruleId) {
     if (timer) {
@@ -47,6 +83,7 @@ function startTimer(seconds, ruleId) {
 function stopTimer() {
     if (timer) {
         clearInterval(timer);
+        timer = null;
     }
 }
 
@@ -124,9 +161,10 @@ function createBlockingOverlay() {
             if (!document.getElementById('swt-blocking-overlay')) {
                 const blockingOverlayDiv = document.createElement('div');
                 blockingOverlayDiv.id = 'swt-blocking-overlay';
-                blockingOverlayDiv.innerHTML = '<div class="swt-blocking-overlay-text">Overlay text goes here</div>';
+                blockingOverlayDiv.innerHTML = '<div class="swt-blocking-overlay-text">You have exceeded your daily allocated time for this website.<br />Time to be productive!</div>';
                 document.body.appendChild(blockingOverlayDiv);
             }
+            document.body.classList.add('swt-blocking-hide-overflow');
         },
         target: {tabId: activeTabId}
     });
@@ -137,9 +175,18 @@ function removeBlockingOverlay() {
     browser.scripting.executeScript({
         func: () => {
             if (document.getElementById('swt-blocking-overlay')) {
-                document.body.removeChild(blockingOverlayDiv);
+                document.getElementById('swt-blocking-overlay').remove();
             }
+            document.body.classList.remove('swt-blocking-hide-overflow');
         },
         target: {tabId: activeTabId}
     });
+}
+
+
+function getRuleByUrl() {
+    return {
+        "id": 1337,
+        "timeLeft": 10
+    };
 }
