@@ -23,8 +23,10 @@ browser.runtime.onMessage.addListener(
 /* When the tab gets updated (e.g. navigation) */
 browser.tabs.onUpdated.addListener(
     function(_tabId, changeInfo, tabInfo) {
-        console.log(changeInfo);
-        tabHandler();
+        // Ignore anchors - they don't navigate us away from the site
+        if (changeInfo.url && !changeInfo.title && !changeInfo.url.includes('#')) {
+            tabHandler();
+        }
     }
 )
 
@@ -50,6 +52,12 @@ function tabHandler() {
     browser.tabs.query({currentWindow: true, active: true})
         .then((tabs) => {
             let rule = getRuleByUrl(tabs[0].url);
+
+            // No rule for this website, no action needed
+            if (!rule) {
+                return;
+            }
+
             activeTabId = tabs[0].id;
 
             // Inject our CSS into the currently active tab
@@ -57,11 +65,6 @@ function tabHandler() {
                 files: ['swt.css'],
                 target: {tabId: activeTabId}
             })
-
-            // No rule for this website, no action needed
-            if (!rule) {
-                return;
-            }
 
             if (rule.timeLeft > 0) {
                 removeBlockingOverlay();
