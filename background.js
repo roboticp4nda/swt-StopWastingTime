@@ -76,6 +76,7 @@ function tabHandler() {
         })
 }
 
+/* Starts the timer/sets up the interval for the specified rule*/
 function startTimer(seconds, ruleId) {
     if (timer) {
         stopTimer();
@@ -86,6 +87,7 @@ function startTimer(seconds, ruleId) {
     timer = setInterval(intervalSync, UPDATE_INTERVAL_SECONDS * 100, ruleId);
 }
 
+/* Stops the timer and clears the interval */
 function stopTimer() {
     if (timer) {
         clearInterval(timer);
@@ -108,22 +110,20 @@ function intervalSync(ruleId) {
 
 /* Main interval function, called by intervalSync every UPDATE_INTERVAL_SECONDS */
 function countdownTimer(ruleId) {
+    timeLeftSeconds -= 1;
+
     // Time has run out - create blocking overlay, stop timer
     if (timeLeftSeconds <= 0) {
         createBlockingOverlay();
         stopTimer();
         return;
     }
-
-    // Decrement timer
-    timeLeftSeconds -= 1;
-
-    // Update the timer UI
+    
     updateUI(formatTime(timeLeftSeconds));
 }
 
 
-/* Update the timer UI with the current time left */
+/* Updates the timer UI with the current time left */
 function updateUI(timeLeftFormatted) {
     function updateTimerUI(timeLeftFormatted) {
         if (!document.getElementById('swt-timer')) {
@@ -189,8 +189,9 @@ function removeBlockingOverlay() {
     });
 }
 
-
+/* Gets the current rule ID and time left from local storage based on the URL */
 function getRuleByUrl() {
+    // TODO
     return {
         "id": 1337,
         "timeLeft": 10
