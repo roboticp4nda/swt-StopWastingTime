@@ -22,8 +22,8 @@ browser.runtime.onMessage.addListener(
 
 /* When the tab gets updated (e.g. navigation) */
 browser.tabs.onUpdated.addListener(
-    function(_tabId, _changeInfo, tabInfo) {
-        console.log(tabInfo);
+    function(_tabId, changeInfo, tabInfo) {
+        console.log(changeInfo);
         tabHandler();
     }
 )
@@ -35,10 +35,13 @@ browser.tabs.onActivated.addListener(
     }
 )
 
-/* When a new window gets focus*/
+/* When a new window gets focus */
 browser.windows.onFocusChanged.addListener(
-    function() {
-        tabHandler();
+    function(windowId) {
+        // No action if focus is lost for a non-browser window
+        if (windowId > 0) {
+            tabHandler();
+        }
     }
 )
 
