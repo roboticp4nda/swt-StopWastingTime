@@ -19,10 +19,13 @@ browser.runtime.onMessage.addListener(
     }
 )
 
-
 /* When the tab gets updated (e.g. navigation) */
 browser.tabs.onUpdated.addListener(
     function(_tabId, changeInfo, tabInfo) {
+        // No action if a tab was updated in the background (no focus)
+        if (!tabInfo.active) {
+            return;
+        }
         // Ignore anchors - they don't navigate us away from the site
         if (changeInfo.url && !changeInfo.title && !changeInfo.url.includes('#')) {
             tabHandler();
@@ -32,7 +35,11 @@ browser.tabs.onUpdated.addListener(
 
 /* When a new tab gets focus */
 browser.tabs.onActivated.addListener(
-    function (_activeInfo) {
+    function (activeInfo) {
+        if (activeInfo.previousTabId) {
+            stopTimer();
+            updateUI(null, 'delete', activeInfo.previousTabId);
+        }
         tabHandler();
     }
 )
@@ -43,6 +50,25 @@ browser.windows.onFocusChanged.addListener(
         // No action if focus is lost for a non-browser window
         if (windowId > 0) {
             tabHandler();
+        }
+    }
+)
+
+/* Stops the timer if a window is closed, or if the active tab is closed
+ * Does not stop if a non-focused tab is closed from the background
+ */
+browser.tabs.onRemoved.addListener(
+    function(tabId, removeInfo) {
+        if (removeInfo.isWindowClosing) {
+            stopTimer();
+        }
+        else {
+            browser.tabs.query({currentWindow: true, active: true})
+            .then((tabs) => {
+                if (tabs[0].id == tabId) {
+                    stopTimer();
+                }
+            })
         }
     }
 )
@@ -76,13 +102,13 @@ function tabHandler() {
         })
 }
 
-/* Starts the timer/sets up the interval for the specified rule*/
+/* Starts the timer/sets up the interval for the specified rule */
 function startTimer(seconds, ruleId) {
     if (timer) {
         stopTimer();
     }
     timeLeftSeconds = seconds;
-    updateUI(formatTime(timeLeftSeconds));
+    updateUI(formatTime(timeLeftSeconds), 'create');
     intervalLastFireDate = new Date();
     timer = setInterval(intervalSync, UPDATE_INTERVAL_SECONDS * 100, ruleId);
 }
@@ -119,28 +145,50 @@ function countdownTimer(ruleId) {
         return;
     }
     
-    updateUI(formatTime(timeLeftSeconds));
+    updateUI(formatTime(timeLeftSeconds), 'update');
 }
 
 
 /* Updates the timer UI with the current time left */
-function updateUI(timeLeftFormatted) {
-    function updateTimerUI(timeLeftFormatted) {
+function updateUI(timeLeftFormatted, action, previousTabId) {
+    function createOrUpdateTimerUI(timeLeftFormatted) {
         if (!document.getElementById('swt-timer')) {
             const timerDiv = document.createElement('div');
             timerDiv.id = 'swt-timer';
-            timerDiv.innerHTML = 'time: ' + timeLeftFormatted;
+            timerDiv.innerHTML = timeLeftFormatted;
             document.body.appendChild(timerDiv);
         }
         else {
-            document.getElementById('swt-timer').innerHTML = 'time: ' + timeLeftFormatted;
+            document.getElementById('swt-timer').innerHTML = timeLeftFormatted;
         }
+    }
+
+    function deleteTimerUI() {
+        const timerDiv = document.getElementById('swt-timer')
+        if (timerDiv) {
+            document.getElementById('swt-timer').remove();
+        }
+    }
+
+    let call;
+    let tabId = activeTabId;
+    switch (action) {
+        case 'create':
+        case 'update':
+            call = createOrUpdateTimerUI;
+            break;
+        case 'delete':
+            call = deleteTimerUI;
+            tabId = previousTabId;
+            break;
+        default:
+            return;
     }
 
     browser.scripting.executeScript({
         args: [timeLeftFormatted],
-        func: updateTimerUI,
-        target: {tabId: activeTabId}
+        func: call,
+        target: {tabId: tabId}
     });
 }
 
