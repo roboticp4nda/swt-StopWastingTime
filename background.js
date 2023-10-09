@@ -47,15 +47,16 @@ browser.tabs.onActivated.addListener(
 /* When a new window gets focus */
 browser.windows.onFocusChanged.addListener(
     function(windowId) {
-        // Remove the timer from non-focused window(s)
-        browser.tabs.query({currentWindow: false, active: true})
-        .then((tabs) => {
-            for (let tab of tabs) {
-                updateUI(null, 'delete', tab.id);
-            }
-        })
         // No action if focus is lost for a non-browser window
         if (windowId > 0) {
+            // Remove the timer from non-focused window(s)
+            browser.tabs.query({currentWindow: false, active: true})
+            .then((tabs) => {
+                for (let tab of tabs) {
+                    updateUI(null, 'delete', tab.id);
+                }
+            })
+
             tabHandler();
         }
     }
