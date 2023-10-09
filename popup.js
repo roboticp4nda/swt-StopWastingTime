@@ -5,6 +5,10 @@ document.getElementById('stop').addEventListener('click', (e) => {
     browser.runtime.sendMessage({command: "stopTimer"})
 })*/
 
+document.getElementById('addNewRule').addEventListener('click', (e) => {
+    addRule();
+})
+
 /* Populate the list of rules from localStorage */
 document.addEventListener('DOMContentLoaded', function() {
     const a = document.getElementById('ruleset-container');
@@ -23,6 +27,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 })
+
+/* Formats seconds to mm:ss format */
+function formatTime(seconds) {
+    if (seconds) {
+        let minutes = Math.floor(seconds / 60);
+        seconds = seconds % 60;
+        return (
+            (minutes < 10 ? '0' + minutes : minutes) + ':' +
+            (seconds < 10 ? '0' + seconds : seconds)
+        );
+    }
+    else {
+        return '00:00';
+    }
+
+}
+
+/* */
+async function addRule() {
+    let id = await browser.storage.local.get("nextId");
+
+    // If nextId is not defined yet, means we have no rules, we initialize the id at 0
+    if (isEmptyObj(id)) {
+        await browser.storage.local.set({"nextId": 0})
+        id = 0;
+    }
+    else {
+        id = id["nextId"];
+    }
+}
+
+
+
+
+
+
 
 var testRules = [
     { 
@@ -71,18 +111,8 @@ var testRules = [
     },
 ]
 
-/* Formats seconds to mm:ss format */
-function formatTime(seconds) {
-    if (seconds) {
-        let minutes = Math.floor(seconds / 60);
-        seconds = seconds % 60;
-        return (
-            (minutes < 10 ? '0' + minutes : minutes) + ':' +
-            (seconds < 10 ? '0' + seconds : seconds)
-        );
-    }
-    else {
-        return '00:00';
-    }
-
+/* Checks if an object is empty, localStorage returns such if the key in .get(key) is not found
+ * https://stackoverflow.com/a/68636342 */
+function isEmptyObj(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
