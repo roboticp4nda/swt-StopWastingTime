@@ -145,6 +145,7 @@ function intervalSync(ruleId) {
 /* Main interval function, called by intervalSync every UPDATE_INTERVAL_SECONDS */
 function countdownTimer(ruleId) {
     timeLeftSeconds -= 1;
+    updateUI(formatTime(timeLeftSeconds), 'update');
 
     // Time has run out - create blocking overlay, stop timer
     if (timeLeftSeconds <= 0) {
@@ -152,8 +153,6 @@ function countdownTimer(ruleId) {
         stopTimer();
         return;
     }
-    
-    updateUI(formatTime(timeLeftSeconds), 'update');
 }
 
 
