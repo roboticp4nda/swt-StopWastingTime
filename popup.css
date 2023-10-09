@@ -1,0 +1,23 @@
+body {
+    max-width: 550px;
+    width: 100%;
+    max-height: 400px;
+}
+.fs-8 {
+    font-size: 0.8rem;
+}
+.settings-icon:hover {
+    background-color: #444;
+}
+.row-hover:hover {
+    background-color: #202124;
+}
+.rule-active {
+    color: #0f0;
+}
+.rule-depleted {
+    color: #f00;
+}
+#timerVisible {
+    cursor: pointer;
+}
