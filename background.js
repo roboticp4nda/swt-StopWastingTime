@@ -6,13 +6,21 @@ let intervalLastFireDate;
 
 /* When getting an action event via popup.js */
 browser.runtime.onMessage.addListener(
-    function(request) {
-        switch (request.command) {
+    function(message, _sender, sendResponse) {
+        switch (message.request) {
             case 'startTimer':
-                startTimer(request.seconds, request.ruleId);
+                startTimer(message.seconds, message.ruleId);
                 break;
             case 'stopTimer':
                 stopTimer();
+                break;
+            case 'getActiveTimeleft':
+                if (timer) {
+                    sendResponse({timeleft: timeLeftSeconds});
+                }
+                else {
+                    sendResponse(null);
+                }
                 break;
             default:
         }
@@ -126,6 +134,7 @@ function stopTimer() {
     if (timer) {
         clearInterval(timer);
         timer = null;
+        timeLeftSeconds = null;
     }
 }
 

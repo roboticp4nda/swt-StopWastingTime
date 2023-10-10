@@ -1,5 +1,5 @@
 body {
-    max-width: 600px;
+    max-width: 550px;
     width: 100%;
     max-height: 400px;
 }
@@ -12,11 +12,11 @@ body {
 .row-hover:hover {
     background-color: #202124;
 }
-.rule-active {
-    color: #0f0;
-}
 .rule-depleted {
     color: #f00;
+}
+.rule-in-progress {
+    color: #0f0;
 }
 #timerVisible {
     cursor: pointer;

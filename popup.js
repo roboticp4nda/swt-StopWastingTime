@@ -1,21 +1,16 @@
-/*document.getElementById('start').addEventListener('click', (e) => {
-    browser.runtime.sendMessage({command: "startTimer", seconds: 10, ruleId: 1337})
-})
-document.getElementById('stop').addEventListener('click', (e) => {
-    browser.runtime.sendMessage({command: "stopTimer"})
-})*/
-
 document.getElementById('addNewRule').addEventListener('click', (e) => {
     addRule();
 })
 
-/* Populate the list of rules from localStorage */
+
 document.addEventListener('DOMContentLoaded', function() {
-    const a = document.getElementById('ruleset-container');
-    if (a) {
+    /* Populate the list of rules from localStorage */
+    const rulesetDiv = document.getElementById('ruleset-container');
+    if (rulesetDiv) {
         testRules.sort((a, b) => a.priority - b.priority);
+        let activeRuleId;
         for (rule of testRules) {
-            a.innerHTML += '<div class="row row-active row-hover align-items-center border-secondary border-top border-opacity-25" id="swt-rule-' + rule.id + '">' +
+            rulesetDiv.innerHTML += '<div class="row row-active row-hover align-items-center border-secondary border-top border-opacity-25" id="swt-rule-' + rule.id + '">' +
             '<div class="col sm fs-3 text-end"><span class="settings-icon" role="button">' + (rule.priority > 0 ? '↑' : '') + '</span></div>' +
             '<div class="col sm fs-3 text-start"><span class="settings-icon" role="button">' + (rule.priority < testRules.length-1 ? '↓' : '') + '</span></div>' +
             '<div class="col-4 text-truncate">' + rule.name + '</div>' +
@@ -24,7 +19,39 @@ document.addEventListener('DOMContentLoaded', function() {
             '<span class="d-inline p-1 settings-icon" role="button">' + '⚙' + '</span>' +
             '<span class="d-inline p-1 settings-icon" role="button">' + '🗑️' + '</span></div>' +
             '</div>'
+
+            // Color the timeleft column if running or depleted
+            let timeleftColumn = document.getElementById('swt-timeleft-' + rule.id);
+            if (rule.timeLeftSeconds < 1) {
+                timeleftColumn.classList.add('rule-depleted');
+            }
+            else if (rule.inProgress) {
+                timeleftColumn.classList.add('rule-in-progress', 'fw-bold');
+                activeRuleId = rule.id;
+            }
         }
+    
+
+        /* While popup is open, keep updating the time left of the active rule */
+        let updateInterval = setInterval(
+            async function () {
+                let response = await browser.runtime.sendMessage({request: "getActiveTimeleft"});
+                if (response && activeRuleId) {
+                    let timeleftColumn = document.getElementById('swt-timeleft-' + activeRuleId);
+                    timeleftColumn.innerText = formatTime(response.timeleft);
+
+                    // Update visuals and stop the interval if we hit 00:00
+                    if (response.timeleft < 1) {
+                        timeleftColumn.classList.remove('rule-in-progress', 'fw-bold');
+                        timeleftColumn.classList.add('rule-depleted');
+                        clearInterval(updateInterval);
+                    }
+                }
+                else {
+                    clearInterval(updateInterval);
+                }
+            }, 1000
+        )
     }
 })
 
@@ -74,7 +101,8 @@ var testRules = [
         'timeLeftSeconds': 7900,
         'isEnabled': true,
         'lastReset': new Date('2023-10-09'),
-        'priority': 0
+        'priority': 0,
+        'inProgress': true
     },
     { 
         'id': 155,
@@ -85,7 +113,8 @@ var testRules = [
         'timeLeftSeconds': 15,
         'isEnabled': true,
         'lastReset': new Date('2023-10-08'),
-        'priority': 1
+        'priority': 1,
+        'inProgress': false
     },
     { 
         'id': 170,
@@ -93,10 +122,11 @@ var testRules = [
         'blockString': 'reddit.com, facebook.com, twitter.com, tiktok.com',
         'exceptString': '',
         'timeAllocatedMinutes': 30,
-        'timeLeftSeconds': 1522,
+        'timeLeftSeconds': 0,
         'isEnabled': true,
         'lastReset': new Date('2023-10-09'),
-        'priority': 3
+        'priority': 3,
+        'inProgress': false
     },
     { 
         'id': 252,
@@ -107,7 +137,164 @@ var testRules = [
         'timeLeftSeconds': 10,
         'isEnabled': false,
         'lastReset': new Date('2023-10-05'),
-        'priority': 2
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
+    },
+    { 
+        'id': 252,
+        'name': 'edddddddddddddddddddddd dddddddddddddX',
+        'blockString': 'edx.com',
+        'exceptString': '',
+        'timeAllocatedMinutes': 1,
+        'timeLeftSeconds': 10,
+        'isEnabled': false,
+        'lastReset': new Date('2023-10-05'),
+        'priority': 2,
+        'inProgress': false
     },
 ]
 
