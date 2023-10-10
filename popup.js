@@ -1,34 +1,13 @@
 let activeRuleId;
 
-document.getElementById('addNewRule').addEventListener('click', (e) => {
-    addRule();
-})
-
-
+/* When the user opens the popup */
 document.addEventListener('DOMContentLoaded', function() {
-    
     const rulesetDiv = document.getElementById('ruleset-container');
     if (rulesetDiv) {
         populateRuleset(rulesetDiv);
-        updateRuleset();
+        updateTimeleft();
     }
 })
-
-/* Formats seconds to mm:ss format */
-function formatTime(seconds) {
-    if (seconds) {
-        let minutes = Math.floor(seconds / 60);
-        seconds = seconds % 60;
-        return (
-            (minutes < 10 ? '0' + minutes : minutes) + ':' +
-            (seconds < 10 ? '0' + seconds : seconds)
-        );
-    }
-    else {
-        return '00:00';
-    }
-
-}
 
 /* */
 async function addRule() {
@@ -263,6 +242,22 @@ function isEmptyObj(obj) {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
 
+/* Formats seconds to mm:ss format */
+function formatTime(seconds) {
+    if (seconds) {
+        let minutes = Math.floor(seconds / 60);
+        seconds = seconds % 60;
+        return (
+            (minutes < 10 ? '0' + minutes : minutes) + ':' +
+            (seconds < 10 ? '0' + seconds : seconds)
+        );
+    }
+    else {
+        return '00:00';
+    }
+
+}
+
 /* Populate the list of rules from localStorage */
 function populateRuleset(rulesetDiv) {
     rulesetDiv.innerHTML = '';
@@ -291,7 +286,7 @@ function populateRuleset(rulesetDiv) {
 }
 
 /* While popup is open, keep updating the time left of the active rule */
-function updateRuleset() {
+function updateTimeleft() {
     let updateInterval = setInterval(
         async function () {
             let response = await browser.runtime.sendMessage({request: "getActiveTimeleft"});
