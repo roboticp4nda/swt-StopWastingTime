@@ -13,6 +13,9 @@ function openSettings(header, id) {
         // TODO: Stop timer?
         // TODO: pre-populate and prepare for edit
     }
+    else {
+        document.getElementById("save-button").innerHTML = "Add Rule"
+    }
     document.getElementById("settings-header").innerHTML = header;
     document.body.classList.add('overflow-hidden');
     document.body.classList.remove('overflow-auto');

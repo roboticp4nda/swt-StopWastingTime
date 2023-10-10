@@ -36,10 +36,35 @@
               <div class="col-12"><h1 id="settings-header">Rule</h1></div>
               <div data-bs-theme="dark"><button type="button" class="btn-close" aria-label="Close" id="settings-close"></button></div>
             </div>
-            <div class=""></div>
+            <form class="container ms-2" data-bs-theme="dark">
+              <div>
+                <div class="row">
+                  <div class="col-6"><div class="mt-4"><label for="input-rule-name" class="form-label fw-bold">Name</label></div></div>
+                  <div class="col-6"><div class="mt-4"><label for="input-allocated-time" class="form-label fw-bold">Allocated Time (mins)</label></div></div>
+                </div>
+                <div class="row">
+                  <div class="col-6"><input class="form-control" id="input-rule-name" maxlength="50" type="text" placeholder="Enter name of rule" aria-label="Rule name input" required></div>
+                  <div class="col-3"><input class="form-control" id="input-allocated-time" min="0" max="1440" type="number" aria-label="Allocated time input" value="60" required></div>
+                </div>
+              </div>
+              <div>
+                <div class="mt-3"><label for="input-block-domains" class="form-label fw-bold">Match in URL</label></div>
+                <div class="row me-2">
+                  <div class="col-12"><input class="form-control" id="input-block-domains" type="text" placeholder="Enter the websites in a comma separated list" aria-label="Block input"></div>
+                </div>
+              </div>
+              <div>
+                <div class="mt-3"><label for="input-except-domains" class="form-label fw-bold">Exceptions</label></div>
+                <div class="row me-2">
+                  <div class="col-12"><input class="form-control" id="input-block-domains" type="text" placeholder="Enter exceptions in a comma separated list" aria-label="Exception input"></div>
+                </div>
+              </div>
+              <div class="row justify-content-center mt-4">
+                <div class="col-auto"><button type="button" class="btn btn-secondary mb-3">Cancel</button></div>
+                <div class="col-auto"><button type="button" class="btn btn-primary mb-3" id="save-button">Save</button></div>
+              </div>
+            </form>
           </section>
-        
-
         </div>
 
         <script src="popup.js"></script>
