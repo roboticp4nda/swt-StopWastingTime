@@ -10,6 +10,7 @@ document.getElementById('settings-close').addEventListener('click', (e) => {
 
 function openSettings(header, id) {
     if (id) {
+        // TODO: Stop timer?
         // TODO: pre-populate and prepare for edit
     }
     document.getElementById("settings-header").innerHTML = header;
@@ -22,6 +23,7 @@ function openSettings(header, id) {
 
 function closeSettings() {
     if (changesMade) {
+        // TODO: Resume timer?
         // TODO: confirm
     }
     document.body.classList.remove('overflow-hidden');
