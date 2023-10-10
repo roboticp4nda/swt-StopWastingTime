@@ -2,32 +2,9 @@ let activeRuleId;
 
 /* When the user opens the popup */
 document.addEventListener('DOMContentLoaded', function() {
-    const rulesetDiv = document.getElementById('ruleset-container');
-    if (rulesetDiv) {
-        populateRuleset(rulesetDiv);
-        updateTimeleft();
-    }
+    populateRuleset();
+    updateTimeleft();
 })
-
-/* */
-async function addRule() {
-    let id = await browser.storage.local.get("nextId");
-
-    // If nextId is not defined yet, means we have no rules, we initialize the id at 0
-    if (isEmptyObj(id)) {
-        await browser.storage.local.set({"nextId": 0})
-        id = 0;
-    }
-    else {
-        id = id["nextId"];
-    }
-}
-
-
-
-
-
-
 
 var testRules = [
     { 
@@ -259,7 +236,8 @@ function formatTime(seconds) {
 }
 
 /* Populate the list of rules from localStorage */
-function populateRuleset(rulesetDiv) {
+function populateRuleset() {
+    let rulesetDiv = document.getElementById('ruleset-container');
     rulesetDiv.innerHTML = '';
     testRules.sort((a, b) => a.priority - b.priority);
     for (rule of testRules) {
