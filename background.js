@@ -15,12 +15,7 @@ browser.runtime.onMessage.addListener(
                 stopTimer();
                 break;
             case 'getActiveTimeleft':
-                if (timer) {
-                    sendResponse({timeleft: timeLeftSeconds});
-                }
-                else {
-                    sendResponse(null);
-                }
+                sendResponse({timeleft: timeLeftSeconds});
                 break;
             default:
         }
