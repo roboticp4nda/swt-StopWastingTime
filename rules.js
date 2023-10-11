@@ -56,26 +56,57 @@ async function editRule(ruleName, allocatedTime, blockList, exceptList) {
     await storeRule(id, rule);
 }
 
-/* Changes the priority of the selected rule (either increase or release)*/
+/* Changes the priority of the selected rule (either increase or decrease)
+ * Increasing priority lowers the priority number, 0: highest priority
+ */
 async function editPriority(id, change) {
-    // TODO
-    let rule = await browser.storage.local.get(id);
+    let rules = await browser.storage.local.get();
+    let oldPriority = rules[id].priority;
     switch (change) {
+        // Increase priority, decrement priority number
         case 'increase':
+            // Can't decrement below min
+            if (oldPriority <= 0) {
+                return;
+            }
+            for (let rule in rules) {
+                if (rules[rule].priority == oldPriority - 1) {
+                    rules[rule].priority = oldPriority;
+                    await storeRule(rules[rule].id, rules[rule]);
+                    break;
+                }
+            }
+            rules[id].priority -= 1;
             break;
+
+        // Decrease priority, increment priority number
         case 'decrease':
+            // Can't increment above max
+            if (oldPriority >= rules.length - 2) {
+                return;
+            }
+            for (let rule in rules) {
+                if (rules[rule].priority == oldPriority + 1) {
+                    rules[rule].priority = oldPriority;
+                    await storeRule(rules[rule].id, rules[rule]);
+                    break;
+                }
+            }
+            rules[id].priority += 1;
             break;
+
         default:
             break;
     }
-    rule['priority'] 
+
+    await storeRule(id, rules[id]);
+    populateRuleset();
 }
 
 /* Stores the passed <rule> object in storage, with key <id> */
 async function storeRule(id, rule) {
     storageObj = {};
     storageObj[id] = rule;
-
     await browser.storage.local.set(storageObj);
 }
 
@@ -90,14 +121,14 @@ async function deleteRule(id, force) {
 
 function confirmAction(action) {
     if (action === 'delete'){
-        return window.confirm('Are you sure you want to delete this rule?\nNote: You can Shift-click to bypass this dialog.');
+        return window.confirm('Are you sure you want to delete this rule?\nNote: You can shift-click to bypass this dialog.');
     }
     if (action === 'cancel') {
         return window.confirm('You have unsaved changes! Do you still want to abort?');
     }
 
     // Default action, shouldn't be visible
-    return window.confirm('Please confirm');
+    return window.confirm('Please confirm action');
 }
 
 /* Gets the current number of rules in storage
@@ -132,7 +163,7 @@ async function saveSettings() {
 
     // Default if somehow left empty
     if (!name) {
-        name = "Unnamed Rule";
+        name = 'Unnamed Rule';
     }
 
     // Convert time to number if it is valid
@@ -160,6 +191,7 @@ async function saveSettings() {
         await createNewRule(name, time, blockList, exceptList);
     }
 
+    changesMade = false;
     populateRuleset();
     closeSettings();
 }
@@ -216,7 +248,7 @@ function closeSettings() {
 function commaSeparatedStringToArray(str) {
     let output = [];
     try {
-        let split = str.split(",");
+        let split = str.split(',');
         for (let s of split) {
             s = s.toLowerCase().trim();
             if (s.length < 1) {

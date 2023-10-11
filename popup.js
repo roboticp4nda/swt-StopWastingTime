@@ -49,8 +49,8 @@ function populateRuleset() {
             rules.sort((a, b) => a.priority - b.priority);
             for (let rule of rules) {
                 rulesetDiv.innerHTML += '<div class="row row-active row-hover align-items-center border-secondary border-top border-opacity-25" id="swt-rule-' + rule.id + '">' +
-                '<div class="col sm fs-3 text-end"><span class="settings-icon" role="button">' + (rule.priority > 0 ? '↑' : '') + '</span></div>' +
-                '<div class="col sm fs-3 text-start"><span class="settings-icon" role="button">' + (rule.priority < rules.length-1 ? '↓' : '') + '</span></div>' +
+                '<div class="col sm fs-3 text-end"><span class="settings-icon increase-priority" role="button">' + (rule.priority > 0 ? '↑' : '') + '</span></div>' +
+                '<div class="col sm fs-3 text-start"><span class="settings-icon decrease-priority" role="button">' + (rule.priority < rules.length-1 ? '↓' : '') + '</span></div>' +
                 '<div class="col-4 text-truncate"><span title="' + rule.name + '">' + rule.name + '</span></div>' +
                 '<div class="col-2 text-center" id="swt-timeleft-'+ rule.id +'">' + formatTime(rule.timeLeftSeconds) + '</div>' +
                 '<div class="col-4 text-center"><span class="d-inline p-2 settings-icon enable-button"><input role="button" class="form-check-input" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
@@ -73,6 +73,7 @@ function populateRuleset() {
     .then(() => {
         createEditListeners();
         createDeleteListeners();
+        createPriorityListeners();
     })
 }
 
@@ -80,7 +81,7 @@ function populateRuleset() {
 function updateTimeleft() {
     let updateInterval = setInterval(
         async function () {
-            let response = await browser.runtime.sendMessage({request: "getActiveTimeleft"});
+            let response = await browser.runtime.sendMessage({request: 'getActiveTimeleft'});
             if (response && activeRuleId) {
                 let timeleftColumn = document.getElementById('swt-timeleft-' + activeRuleId);
                 timeleftColumn.innerText = formatTime(response.timeleft);
@@ -98,6 +99,27 @@ function updateTimeleft() {
             }
         }, 1000
     )
+}
+
+/* Listeners for priority buttons */
+function createPriorityListeners() {
+    // Increase priority buttons
+    let buttons = document.querySelectorAll('.increase-priority');
+    for (let button of buttons) {
+        let id = button.parentNode.parentNode.id.match(/\d+/)[0];
+        button.addEventListener('click', () => {
+            editPriority(id, 'increase');
+        })
+    }
+
+    // Decrease priority buttons
+    buttons = document.querySelectorAll('.decrease-priority');
+    for (let button of buttons) {
+        let id = button.parentNode.parentNode.id.match(/\d+/)[0];
+        button.addEventListener('click', () => {
+            editPriority(id, 'decrease');
+        })
+    }
 }
 
 /* Listeners for isEnabled checkboxes */
