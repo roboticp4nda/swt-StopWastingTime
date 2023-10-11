@@ -32,11 +32,11 @@ function formatTime(seconds) {
 function populateRuleset() {
     let rulesetDiv = document.getElementById('ruleset-container');
     rulesetDiv.innerHTML = '';
-    rules = []
+    let rules = []
     browser.storage.local.get()
     .then(
         (storageItems) => {
-            for (item in storageItems) {
+            for (let item in storageItems) {
                 // Ignore any non-numeric keys such as 'nextId'
                 if (!isNaN(item)) {
                     rules.push(storageItems[item]);
@@ -47,15 +47,15 @@ function populateRuleset() {
     .then(
         function() {
             rules.sort((a, b) => a.priority - b.priority);
-            for (rule of rules) {
+            for (let rule of rules) {
                 rulesetDiv.innerHTML += '<div class="row row-active row-hover align-items-center border-secondary border-top border-opacity-25" id="swt-rule-' + rule.id + '">' +
                 '<div class="col sm fs-3 text-end"><span class="settings-icon" role="button">' + (rule.priority > 0 ? '↑' : '') + '</span></div>' +
                 '<div class="col sm fs-3 text-start"><span class="settings-icon" role="button">' + (rule.priority < rules.length-1 ? '↓' : '') + '</span></div>' +
                 '<div class="col-4 text-truncate">' + rule.name + '</div>' +
                 '<div class="col-2 text-center" id="swt-timeleft-'+ rule.id +'">' + formatTime(rule.timeLeftSeconds) + '</div>' +
-                '<div class="col-4 text-center"> <span class="d-inline p-2 settings-icon"><input role=button class="form-check-input" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
-                '<span class="d-inline p-1 settings-icon" role="button">' + '⚙' + '</span>' +
-                '<span class="d-inline p-1 settings-icon" role="button">' + '🗑️' + '</span></div>' +
+                '<div class="col-4 text-center"> <span class="d-inline p-2 settings-icon enable-button"><input role="button" class="form-check-input" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
+                '<span class="d-inline p-1 settings-icon edit-rule" role="button">' + '⚙' + '</span>' +
+                '<span class="d-inline p-1 settings-icon delete-rule" role="button">' + '🗑️' + '</span></div>' +
                 '</div>'
 
                 // Color the timeleft column if running or depleted
@@ -70,6 +70,9 @@ function populateRuleset() {
             }
         }
     )
+    .then(() => {
+        createEditListeners();
+    })
 }
 
 /* While popup is open, keep updating the time left of the active rule */
@@ -94,4 +97,27 @@ function updateTimeleft() {
             }
         }, 1000
     )
+}
+
+/* Listeners for isEnabled checkboxes */
+function createEnableListeners() {
+    // TODO
+    document.querySelector();
+}
+
+/* Listeners for edit buttons */
+function createEditListeners() {
+    let buttons = document.querySelectorAll('.edit-rule');
+    for (let button of buttons) {
+        let id = button.parentNode.parentNode.id.match(/\d+/);
+        button.addEventListener('click', () => {
+            openSettings('Edit Rule', id);
+        })
+    }
+}
+
+/* Listeners for delete buttons */
+function createDeleteListeners() {
+    // TODO
+    document.querySelector();
 }
