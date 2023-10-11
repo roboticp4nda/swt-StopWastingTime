@@ -43,6 +43,12 @@ body {
     max-width: 550px;
 }
 
+#settings-close {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+}
+
 .slide-in {
     animation-name: slide-in;
     animation-duration: 0.7s;
@@ -71,10 +77,4 @@ body {
     to {
         top: 150%;
     }
-}
-
-#settings-close {
-    position: absolute;
-    top: 5%;
-    right: 5%;
 }

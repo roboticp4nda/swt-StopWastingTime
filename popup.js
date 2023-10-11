@@ -32,7 +32,7 @@ function formatTime(seconds) {
 function populateRuleset() {
     let rulesetDiv = document.getElementById('ruleset-container');
     rulesetDiv.innerHTML = '';
-    let rules = []
+    let rules = [];
     browser.storage.local.get()
     .then(
         (storageItems) => {

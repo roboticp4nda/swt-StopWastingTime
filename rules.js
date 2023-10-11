@@ -100,6 +100,7 @@ async function editPriority(id, change) {
     }
 
     await storeRule(id, rules[id]);
+    // TODO: send message that priority changed
     populateRuleset();
 }
 
@@ -116,6 +117,7 @@ async function deleteRule(id, force) {
         return;
     }
     await browser.storage.local.remove(id);
+    //TODO: move all prios below this one up
     populateRuleset();
 }
 

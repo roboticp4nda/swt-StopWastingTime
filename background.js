@@ -248,7 +248,7 @@ function removeBlockingOverlay() {
     });
 }
 
-/* Gets the current rule ID and time left from local storage based on the URL */
+/* Gets the matching rule IDs and times left from local storage based on the active URL */
 function getRuleByUrl() {
     // TODO
     return {
