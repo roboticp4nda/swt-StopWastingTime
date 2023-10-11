@@ -183,7 +183,6 @@ function closeSettings() {
     let rulePage = document.getElementById('rule-page');
     rulePage.classList.remove('slide-in');
     rulePage.classList.add('slide-out');
-
     ruleBeingEdited = null;
 }
 

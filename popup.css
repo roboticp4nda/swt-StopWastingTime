@@ -4,27 +4,35 @@ body {
     min-height: 400px;
     max-height: 400px;
 }
+
 .fs-8 {
     font-size: 0.8rem;
 }
+
 .settings-icon:hover {
     background-color: #444;
 }
+
 .row-hover:hover {
     background-color: #202124;
 }
+
 .rule-depleted {
     color: #f00;
 }
+
 .rule-in-progress {
     color: #0f0;
 }
+
 #timer-visibility-switch {
     cursor: pointer;
 }
+
 #main-page {
     z-index: 1;
 }
+
 #rule-page {
     z-index: 2;
     position: fixed;
@@ -34,6 +42,7 @@ body {
     height: 100%;
     max-width: 550px;
 }
+
 .slide-in {
     animation-name: slide-in;
     animation-duration: 0.7s;
