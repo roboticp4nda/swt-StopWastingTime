@@ -9,7 +9,7 @@ document.getElementById('settings-form').addEventListener('submit', (e) => {
     saveSettings();
 });
 
-/* Adds the rule to local storage */
+/* Adds the rule to local storage with values from form */
 async function createNewRule(ruleName, allocatedTime, blockList, exceptList) {
     id = await getNextId();
     await browser.storage.local.set({'nextId': (id + 1)});
@@ -32,14 +32,12 @@ async function createNewRule(ruleName, allocatedTime, blockList, exceptList) {
     await storeRule(id, rule);
 }
 
+/* Edits the rule specified in global variable <ruleBeingEdited> with new values from form */
 async function editRule(ruleName, allocatedTime, blockList, exceptList) {
     rule = ruleBeingEdited;
     id = ruleBeingEdited.id;
 
     // Update the name
-    console.log(rule)
-    console.log(rule.name)
-    console.log(ruleName)
     rule.name = ruleName;
 
     // Update the time left by calculating difference
@@ -78,6 +76,13 @@ async function storeRule(id, rule) {
     storageObj[id] = rule;
 
     await browser.storage.local.set(storageObj);
+}
+
+/* Deletes a rule specified by its id */
+async function deleteRule(id) {
+    // TODO: confirm
+    await browser.storage.local.remove(id);
+    populateRuleset();
 }
 
 /* Gets the current number of rules in storage

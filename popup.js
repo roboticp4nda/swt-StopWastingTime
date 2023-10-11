@@ -72,6 +72,7 @@ function populateRuleset() {
     )
     .then(() => {
         createEditListeners();
+        createDeleteListeners();
     })
 }
 
@@ -109,7 +110,7 @@ function createEnableListeners() {
 function createEditListeners() {
     let buttons = document.querySelectorAll('.edit-rule');
     for (let button of buttons) {
-        let id = button.parentNode.parentNode.id.match(/\d+/);
+        let id = button.parentNode.parentNode.id.match(/\d+/)[0];
         button.addEventListener('click', () => {
             openSettings('Edit Rule', id);
         })
@@ -118,6 +119,11 @@ function createEditListeners() {
 
 /* Listeners for delete buttons */
 function createDeleteListeners() {
-    // TODO
-    document.querySelector();
+    let buttons = document.querySelectorAll('.delete-rule');
+    for (let button of buttons) {
+        let id = button.parentNode.parentNode.id.match(/\d+/)[0];
+        button.addEventListener('click', () => {
+            deleteRule(id);
+        })
+    }
 }
