@@ -122,8 +122,15 @@ function createDeleteListeners() {
     let buttons = document.querySelectorAll('.delete-rule');
     for (let button of buttons) {
         let id = button.parentNode.parentNode.id.match(/\d+/)[0];
-        button.addEventListener('click', () => {
-            deleteRule(id);
+
+        button.addEventListener('click', (e) => {
+            // If user is shift-clicking delete, force without confirm
+            if (e.shiftKey) {
+                deleteRule(id, true);
+            }
+            else {
+                deleteRule(id, false);
+            }
         })
     }
 }

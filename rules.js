@@ -4,6 +4,7 @@ let ruleBeingEdited = null;
 document.getElementById('add-new-rule').addEventListener('click', () => openSettings('Add New Rule'));
 document.getElementById('settings-close').addEventListener('click', () => closeSettings());
 document.getElementById('settings-cancel').addEventListener('click', () => closeSettings());
+document.getElementById('settings-form').addEventListener('change', () => changesMade = true);
 document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
     saveSettings();
@@ -79,10 +80,24 @@ async function storeRule(id, rule) {
 }
 
 /* Deletes a rule specified by its id */
-async function deleteRule(id) {
-    // TODO: confirm
+async function deleteRule(id, force) {
+    if (!force && !confirmAction('delete')) {
+        return;
+    }
     await browser.storage.local.remove(id);
     populateRuleset();
+}
+
+function confirmAction(action) {
+    if (action === 'delete'){
+        return window.confirm('Are you sure you want to delete this rule?\nNote: You can Shift-click to bypass this dialog.');
+    }
+    if (action === 'cancel') {
+        return window.confirm('You have unsaved changes! Do you still want to abort?');
+    }
+
+    // Default action, shouldn't be visible
+    return window.confirm('Please confirm');
 }
 
 /* Gets the current number of rules in storage
@@ -151,6 +166,7 @@ async function saveSettings() {
 
 /* The page to display if the user clicks add/edit rule */
 function openSettings(header, id) {
+    changesMade = false;
     if (id) {
         // TODO: Stop timer?
         browser.storage.local.get(id)
@@ -183,7 +199,10 @@ function openSettings(header, id) {
 function closeSettings() {
     if (changesMade) {
         // TODO: Resume timer?
-        // TODO: confirm
+        // Don't close if user isn't finished
+        if (!confirmAction('cancel')) {
+            return;
+        }
     }
     document.body.classList.remove('overflow-hidden');
     document.body.classList.add('overflow-auto');
