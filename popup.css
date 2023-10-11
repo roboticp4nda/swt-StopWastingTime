@@ -1,6 +1,7 @@
 body {
     max-width: 550px;
-    width: 100%;
+    min-width: 550px;
+    min-height: 400px;
     max-height: 400px;
 }
 .fs-8 {
@@ -27,39 +28,39 @@ body {
 #rule-page {
     z-index: 2;
     position: fixed;
-    left: -150%;
-    top: 0;
+    left: 0;
+    top: 150%;
     width: 100%;
     height: 100%;
     max-width: 550px;
 }
 .slide-in {
     animation-name: slide-in;
-    animation-duration: 1s;
+    animation-duration: 0.7s;
     animation-fill-mode: forwards;
 }
 
 @keyframes slide-in {
     from {
-        left: -100%;
+        top: 100%;
     }
     to {
-        left: 0;
+        top: 0;
     }
 }
 
 .slide-out {
     animation-name: slide-out;
-    animation-duration: 1s;
+    animation-duration: 1.05s;
     animation-fill-mode: forwards;
 }
 
 @keyframes slide-out {
     from {
-        left: 0;
+        top: 0;
     }
     to {
-        left: -150%;
+        top: 150%;
     }
 }
 

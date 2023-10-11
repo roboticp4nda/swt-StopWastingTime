@@ -33,6 +33,7 @@ async function addRule(ruleName, allocatedTime, blockList, exceptList) {
     let priority = await getTotalRules();
 
     rule = {
+        'id': id,
         'name': ruleName,
         'blockList': blockList,
         'exceptList': exceptList,
@@ -55,7 +56,7 @@ async function addRule(ruleName, allocatedTime, blockList, exceptList) {
  */
 async function getTotalRules() {
     let rules = await browser.storage.local.get();
-    return Object.keys(rules).length;
+    return Math.max(Object.keys(rules).length - 1, 0);
 
 }
 
@@ -86,9 +87,9 @@ function saveSettings() {
         name = "Unnamed Rule";
     }
 
-    // Check if time is a valid number
-    if (typeof time === 'number') {
-        time = Math.floor(time)
+    // Convert time to number if it is valid
+    if (!isNaN(time)) {
+        time = Math.floor(+time)
     }
     else {
         closeSettings();
@@ -104,9 +105,12 @@ function saveSettings() {
     exceptList = commaSeparatedStringToArray(exceptList);
 
     // Add the rule, close settings, re-render list
-    addRule(name, time, blockList, exceptList);
-    populateRuleset();
-    closeSettings();
+    addRule(name, time, blockList, exceptList).then(
+        () => {
+            populateRuleset();
+            closeSettings();
+        }
+    );
 }
 
 /* The page to display if the user clicks add/edit rule */
@@ -161,4 +165,14 @@ function commaSeparatedStringToArray(str) {
     }
 
     return output;
+}
+
+/* Displays an error for the specified field upon input */
+function displayError(field, value) {
+    // TODO
+}
+
+/* Clears all input error messages */
+function clearErrors() {
+    // TODO
 }
