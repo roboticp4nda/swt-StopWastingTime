@@ -116,8 +116,18 @@ async function deleteRule(id, force) {
     if (!force && !confirmAction('delete')) {
         return;
     }
+    let deletedPriority = await browser.storage.local.get(id).then((rule) => {return rule[id].priority});
     await browser.storage.local.remove(id);
-    //TODO: move all prios below this one up
+    
+    // Move all priorities one up to cover the deleted one
+    let rules = await browser.storage.local.get();
+    for (let rule in rules) {
+        if (rules[rule].priority > deletedPriority) {
+            rules[rule].priority -= 1;
+            storeRule(rule, rules[rule]);
+        }
+    }
+
     populateRuleset();
 }
 
@@ -158,14 +168,17 @@ async function getNextId() {
 }
 
 async function saveSettings() {
-    let name = document.getElementById('input-rule-name').value;
-    let time = document.getElementById('input-allocated-time').value;
+    let hasError = false;
+    clearErrors();
+    let name = document.getElementById('input-name').value;
+    let time = document.getElementById('input-time').value;
     let blockList = document.getElementById('input-blocklist').value;
     let exceptList = document.getElementById('input-exceptlist').value;
 
-    // Default if somehow left empty
-    if (!name) {
-        name = 'Unnamed Rule';
+    // If name is empty
+    if (!name || name.trim().length < 1) {
+        displayError('name', 'Name must not be empty');
+        hasError = true;
     }
 
     // Convert time to number if it is valid
@@ -173,19 +186,22 @@ async function saveSettings() {
         time = Math.floor(+time)
     }
     else {
-        closeSettings();
-        return;
+        displayError('time', 'Invalid number');
+        hasError = true;
     }
 
     // Separate the strings by commas
     blockList = commaSeparatedStringToArray(blockList);
-    if (!blockList) {
-        closeSettings();
-        return;
+    if (!blockList || blockList.length < 1) {
+        displayError('blocklist', 'Must contain at least one valid string');
+        hasError = true;
     }
     exceptList = commaSeparatedStringToArray(exceptList);
 
-    // Add the rule, close settings, re-render list
+    if (hasError) {
+        return;
+    }
+
     if (ruleBeingEdited) {
         await editRule(name, time, blockList, exceptList);
     }
@@ -205,8 +221,8 @@ function openSettings(header, id) {
         // TODO: Stop timer?
         browser.storage.local.get(id)
         .then((rule) => {
-            document.getElementById('input-rule-name').value = rule[id].name;
-            document.getElementById('input-allocated-time').value = rule[id].timeAllocatedMinutes;
+            document.getElementById('input-name').value = rule[id].name;
+            document.getElementById('input-time').value = rule[id].timeAllocatedMinutes;
             document.getElementById('input-blocklist').value = rule[id].blockList.join(', ');
             document.getElementById('input-exceptlist').value = rule[id].exceptList.join(', ');
             document.getElementById('settings-save').innerHTML = 'Edit Rule';
@@ -215,15 +231,16 @@ function openSettings(header, id) {
         
     }
     else {
-        document.getElementById('input-rule-name').value = '';
-        document.getElementById('input-allocated-time').value = 60;
+        document.getElementById('input-name').value = '';
+        document.getElementById('input-time').value = 60;
         document.getElementById('input-blocklist').value = '';
         document.getElementById('input-exceptlist').value = '';
         document.getElementById('settings-save').innerHTML = 'Add Rule';
     }
+    clearErrors();
     document.getElementById('settings-header').innerHTML = header;
     document.body.classList.add('overflow-hidden');
-    document.body.classList.remove('overflow-auto');
+    document.body.classList.remove('overflow-y-scroll');
     let rulePage = document.getElementById('rule-page');
     rulePage.classList.remove('slide-out');
     rulePage.classList.add('slide-in');
@@ -239,7 +256,7 @@ function closeSettings() {
         }
     }
     document.body.classList.remove('overflow-hidden');
-    document.body.classList.add('overflow-auto');
+    document.body.classList.add('overflow-y-scroll');
     let rulePage = document.getElementById('rule-page');
     rulePage.classList.remove('slide-in');
     rulePage.classList.add('slide-out');
@@ -267,11 +284,21 @@ function commaSeparatedStringToArray(str) {
 }
 
 /* Displays an error for the specified field upon input */
-function displayError(field, value) {
-    // TODO
+function displayError(field, error) {
+    try {
+        let errorDiv = document.getElementById('form-error-' + field);
+        errorDiv.innerHTML = error;
+        document.getElementById('input-' + field).focus();
+    }
+    catch (e) {
+        return;
+    }
 }
 
 /* Clears all input error messages */
 function clearErrors() {
-    // TODO
+    document.getElementById('form-error-name').innerHTML = '';
+    document.getElementById('form-error-time').innerHTML = '';
+    document.getElementById('form-error-blocklist').innerHTML = '';
+    document.getElementById('form-error-exceptlist').innerHTML = '';
 }

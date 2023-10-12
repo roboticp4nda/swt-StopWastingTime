@@ -49,6 +49,10 @@ body {
     right: 5%;
 }
 
+.form-error {
+    color: #ff4a4a;
+}
+
 .slide-in {
     animation-name: slide-in;
     animation-duration: 0.7s;
