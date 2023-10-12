@@ -106,9 +106,7 @@ async function editPriority(id, change) {
 
 /* Stores the passed <rule> object in storage, with key <id> */
 async function storeRule(id, rule) {
-    storageObj = {};
-    storageObj[id] = rule;
-    await browser.storage.local.set(storageObj);
+    await browser.runtime.sendMessage({request: 'storeRule', ruleId: id, ruleObject: rule});
 }
 
 /* Deletes a rule specified by its id */

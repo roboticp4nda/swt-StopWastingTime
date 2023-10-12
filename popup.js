@@ -81,7 +81,8 @@ function populateRuleset() {
 function updateTimeleft() {
     let updateInterval = setInterval(
         async function () {
-            let response = await browser.runtime.sendMessage({request: 'getActiveTimeleft'});
+            let response = await browser.runtime.sendMessage({request: 'getActiveRules'});
+            // TODO: fix
             if (response && activeRuleId) {
                 let timeleftColumn = document.getElementById('swt-timeleft-' + activeRuleId);
                 timeleftColumn.innerText = formatTime(response.timeleft);

@@ -1,6 +1,6 @@
 const UPDATE_INTERVAL_SECONDS = 1;
 let timer = null;
-let timeLeftSeconds;
+let activeRules;
 let activeTabId;
 let intervalLastFireDate;
 
@@ -14,8 +14,11 @@ browser.runtime.onMessage.addListener(
             case 'stopTimer':
                 stopTimer();
                 break;
-            case 'getActiveTimeleft':
-                sendResponse({timeleft: timeLeftSeconds});
+            case 'getActiveRules':
+                sendResponse({activeRules: activeRules});
+                break;
+            case 'storeRule':
+                storeRule(message.ruleId, message.ruleObject);
                 break;
             default:
         }
@@ -87,25 +90,27 @@ browser.tabs.onRemoved.addListener(
 /* Main flow for new and updated tabs */
 function tabHandler() {
     browser.tabs.query({currentWindow: true, active: true})
-        .then((tabs) => {
-            let rule = getRuleByUrl(tabs[0].url);
+        .then(async function(tabs) {
+            let rules = await getRulesByUrl(tabs[0].url);
 
             // No rule for this website, no action needed
-            if (!rule) {
+            if (!rules || rules.length < 1) {
                 return;
             }
 
             activeTabId = tabs[0].id;
+            activeRules = rules;
 
             // Inject our CSS into the currently active tab
             browser.scripting.insertCSS({
                 files: ['swt.css'],
                 target: {tabId: activeTabId}
-            })
+            });
 
-            if (rule.timeLeft > 0) {
+            // Highest priority is at index 0
+            if (rules[0].timeLeft > 0) {
                 removeBlockingOverlay();
-                startTimer(rule.timeLeft, rule.id);
+                startTimer();
             }
             else {
                 createBlockingOverlay();
@@ -113,15 +118,14 @@ function tabHandler() {
         })
 }
 
-/* Starts the timer/sets up the interval for the specified rule */
-function startTimer(seconds, ruleId) {
+/* Starts the timer/sets up the interval for the specified rules */
+function startTimer() {
     if (timer) {
         stopTimer();
     }
-    timeLeftSeconds = seconds;
-    updateUI(formatTime(timeLeftSeconds), 'create');
+    updateUI(formatTime(activeRules[0].timeLeft), 'create');
     intervalLastFireDate = new Date();
-    timer = setInterval(intervalSync, UPDATE_INTERVAL_SECONDS * 100, ruleId);
+    timer = setInterval(intervalSync, UPDATE_INTERVAL_SECONDS * 100);
 }
 
 /* Stops the timer and clears the interval */
@@ -129,7 +133,6 @@ function stopTimer() {
     if (timer) {
         clearInterval(timer);
         timer = null;
-        timeLeftSeconds = null;
     }
 }
 
@@ -137,22 +140,32 @@ function stopTimer() {
  * This way we make sure that on average, it takes 1 second to count down 1 second
  * Otherwise, there would be cumulating delays (1000ms setInterval would be 1000ms pause + 20ms+ runtime)
  */
-function intervalSync(ruleId) {
+function intervalSync() {
     let date = new Date();
     let diff = date - intervalLastFireDate;
     if (diff >= UPDATE_INTERVAL_SECONDS * 1000) {
         intervalLastFireDate.setSeconds(intervalLastFireDate.getSeconds() + (Math.floor(diff / 1000)));
-        countdownTimer(ruleId);
+        countdownTimer();
     }
 }
 
 /* Main interval function, called by intervalSync every UPDATE_INTERVAL_SECONDS */
-function countdownTimer(ruleId) {
-    timeLeftSeconds -= 1;
-    updateUI(formatTime(timeLeftSeconds), 'update');
+async function countdownTimer() {
+    // Update all active timers in storage
+    for (let activeRule of activeRules) {
+        if (activeRule.timeLeft > 0) {
+            let rule = await browser.storage.local.get(activeRule.id.toString());
+            activeRule.timeLeft -= 1;
+            rule[activeRule.id].timeLeftSeconds -= 1;
+            storeRule(activeRule.id, rule[activeRule.id]);
+        }
+    }
+
+    // Update the main active timer
+    updateUI(formatTime(activeRules[0].timeLeft), 'update');
 
     // Time has run out - create blocking overlay, stop timer
-    if (timeLeftSeconds <= 0) {
+    if (activeRules[0].timeLeft <= 0) {
         createBlockingOverlay();
         stopTimer();
         return;
@@ -249,10 +262,63 @@ function removeBlockingOverlay() {
 }
 
 /* Gets the matching rule IDs and times left from local storage based on the active URL */
-function getRuleByUrl() {
-    // TODO
-    return {
-        "id": 1337,
-        "timeLeft": 10
-    };
+async function getRulesByUrl(url) {
+    if (!url) {
+        return null;
+    }
+    /* Iterate through an array to see if any of them match the url */
+    function hasMatch(array, url) {
+        for (let s of array) {
+            if (url.includes(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    let matchedRules = [];
+    let rules = await browser.storage.local.get();
+
+    if (isEmptyObj(rules)) {
+        return null;
+    }
+    
+    for (let rule in rules) {
+        if (isNaN(rule)) {
+            continue;
+        }
+        let blockList = rules[rule].blockList;
+        let exceptList = rules[rule].exceptList;
+
+        // If any strings in the exception list matches, we ignore this rule
+        if (exceptList.length > 0 && hasMatch(exceptList, url)) {
+            continue;
+        }
+
+        // Add any matches to the return array
+        if (blockList.length > 0 && hasMatch(blockList, url)) {
+            matchedRules.push({
+                "id": rules[rule].id,
+                "timeLeft": rules[rule].timeLeftSeconds,
+                "priority": rules[rule].priority
+            });
+        }
+    }
+
+    // Sort by priority, as we need to reference the highest priority one at index 0
+    matchedRules.sort((a, b) => a.priority - b.priority);
+    return matchedRules;
+}
+
+/* Stores the passed <rule> object in storage, with key <id> */
+async function storeRule(id, rule) {
+    storageObj = {};
+    storageObj[id] = rule;
+    await browser.storage.local.set(storageObj);
+}
+
+/* Checks if an object is empty, localStorage returns such if the key in .get(key) is not found
+ * https://stackoverflow.com/a/68636342 */
+ function isEmptyObj(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
