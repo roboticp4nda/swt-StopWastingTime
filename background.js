@@ -15,7 +15,7 @@ browser.runtime.onMessage.addListener(
                 stopTimer();
                 break;
             case 'getActiveRules':
-                sendResponse({activeRules: activeRules});
+                sendResponse(activeRules);
                 break;
             case 'storeRule':
                 storeRule(message.ruleId, message.ruleObject);
@@ -95,6 +95,7 @@ function tabHandler() {
 
             // No rule for this website, no action needed
             if (!rules || rules.length < 1) {
+                activeRules = null;
                 return;
             }
 

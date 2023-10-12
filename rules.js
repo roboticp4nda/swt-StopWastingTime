@@ -27,7 +27,6 @@ async function createNewRule(ruleName, allocatedTime, blockList, exceptList) {
         'isEnabled': true,
         'lastReset': new Date().setHours(0,0,0,0),
         'priority': priority,
-        'inProgress': false
     }
 
     await storeRule(id, rule);

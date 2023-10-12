@@ -17,12 +17,16 @@ body {
     background-color: #202124;
 }
 
-.rule-depleted {
+.rule-active-depleted {
     color: #f00;
 }
 
-.rule-in-progress {
+.rule-active {
     color: #0f0;
+}
+
+.rule-depleted {
+    color: rgb(255, 177, 177);
 }
 
 #timer-visibility-switch {
