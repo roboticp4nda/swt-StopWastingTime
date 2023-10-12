@@ -288,6 +288,10 @@ async function getRulesByUrl(url) {
         if (isNaN(rule)) {
             continue;
         }
+
+        // Reset the rule's time left if it passes midnight
+        rules[rule] = resetRule(rules[rule]);
+
         let blockList = rules[rule].blockList;
         let exceptList = rules[rule].exceptList;
 
@@ -322,4 +326,18 @@ async function storeRule(id, rule) {
  * https://stackoverflow.com/a/68636342 */
  function isEmptyObj(obj) {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
+/* Resets the rule's allocated time if it's a new day */
+function resetRule(rule) {
+    let lastReset = rule.lastReset;
+    let today = new Date().setHours(0,0,0,0);
+    
+    if (today - lastReset > 0) {
+        rule.timeLeftSeconds = rule.timeAllocatedMinutes * 60;
+        rule.lastReset = today;
+        storeRule(rule.id, rule);
+    }
+
+    return rule;
 }
