@@ -6,7 +6,7 @@ let intervalLastFireDate;
 
 /* When getting an action event via popup.js */
 browser.runtime.onMessage.addListener(
-    function(message, _sender, sendResponse) {
+    async function(message, _sender, sendResponse) {
         switch (message.request) {
             case 'startTimer':
                 startTimer(message.seconds, message.ruleId);
@@ -18,7 +18,7 @@ browser.runtime.onMessage.addListener(
                 sendResponse(activeRules);
                 break;
             case 'storeRule':
-                storeRule(message.ruleId, message.ruleObject);
+                await storeRule(message.ruleId, message.ruleObject);
                 break;
             default:
         }
