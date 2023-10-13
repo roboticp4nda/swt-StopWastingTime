@@ -303,6 +303,11 @@ async function getRulesByUrl(url) {
         // Reset the rule's time left if it passes midnight
         rules[rule] = resetRule(rules[rule]);
 
+        // Skip rule if currently not enabled
+        if (!rules[rule].isEnabled) {
+            continue;
+        }
+
         let blockList = rules[rule].blockList;
         let exceptList = rules[rule].exceptList;
 
@@ -314,9 +319,9 @@ async function getRulesByUrl(url) {
         // Add any matches to the return array
         if (blockList.length > 0 && hasMatch(blockList, url)) {
             matchedRules.push({
-                "id": rules[rule].id,
-                "timeLeft": rules[rule].timeLeftSeconds,
-                "priority": rules[rule].priority
+                'id': rules[rule].id,
+                'timeLeft': rules[rule].timeLeftSeconds,
+                'priority': rules[rule].priority
             });
         }
     }

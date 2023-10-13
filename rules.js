@@ -1,6 +1,7 @@
 let changesMade = false;
 let ruleBeingEdited = null;
 
+/* Listeners for the settings page */
 document.getElementById('add-new-rule').addEventListener('click', () => openSettings('Add New Rule'));
 document.getElementById('settings-close').addEventListener('click', () => closeSettings());
 document.getElementById('settings-cancel').addEventListener('click', () => closeSettings());
@@ -99,8 +100,7 @@ async function editPriority(id, change) {
     }
 
     await storeRule(id, rules[id]);
-    await recheckTabRules();
-    populateRuleset();
+    await recalculateAndRerender();
 }
 
 /* Stores the passed <rule> object in storage, with key <id> */
@@ -130,10 +130,23 @@ async function deleteRule(id, force) {
         }
     }
 
-    await recheckTabRules();
-    populateRuleset();
+    await recalculateAndRerender();
 }
 
+/* Handles any change in the status of the rule (enabled/disabled) */
+async function ruleStatusChanged(isEnabled, id) {
+    let rule = await browser.storage.local.get(id);
+    if (!rule) {
+        return;
+    }
+
+    rule[id].isEnabled = isEnabled;
+
+    await storeRule(id, rule[id]);
+    await recalculateAndRerender();
+}
+
+/* Confirm dialog for deleting rule or attempting to close settings without saving */
 function confirmAction(action) {
     if (action === 'delete'){
         return window.confirm('Are you sure you want to delete this rule?\nNote: You can shift-click to bypass this dialog.');
@@ -170,6 +183,7 @@ async function getNextId() {
     return id;
 }
 
+/* Validates and saves (adds or edits) the rule with the input values */
 async function saveSettings() {
     let hasError = false;
     clearErrors();
@@ -213,11 +227,7 @@ async function saveSettings() {
     }
 
     changesMade = false;
-    await recheckTabRules();
-    if (!updateInterval) {
-        updateTimeleft();
-    }
-    populateRuleset();
+    await recalculateAndRerender();
     closeSettings();
 }
 
@@ -308,4 +318,13 @@ function clearErrors() {
     document.getElementById('form-error-time').innerHTML = '';
     document.getElementById('form-error-blocklist').innerHTML = '';
     document.getElementById('form-error-exceptlist').innerHTML = '';
+}
+
+/* Recalculate timers and visuals */
+async function recalculateAndRerender() {
+    await recheckTabRules();
+    if (!updateInterval) {
+        updateTimeleft();
+    }
+    populateRuleset();
 }

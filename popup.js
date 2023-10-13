@@ -53,13 +53,16 @@ function populateRuleset() {
                 '<div class="col sm fs-3 text-start"><span class="settings-icon decrease-priority" role="button">' + (rule.priority < rules.length-1 ? '↓' : '') + '</span></div>' +
                 '<div class="col-4 text-truncate"><span title="' + rule.name + '">' + rule.name + '</span></div>' +
                 '<div class="col-2 text-center fw-light" id="swt-timeleft-'+ rule.id +'">' + formatTime(rule.timeLeftSeconds) + '</div>' +
-                '<div class="col-4 text-center"><span class="d-inline p-2 settings-icon enable-button"><input role="button" class="form-check-input" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
+                '<div class="col-4 text-center"><span class="d-inline p-2 settings-icon"><input role="button" class="form-check-input enable-rule" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
                 '<span class="d-inline p-1 settings-icon edit-rule" role="button">' + '⚙' + '</span>' +
                 '<span class="d-inline p-1 settings-icon delete-rule" role="button">' + '🗑️' + '</span></div>' +
                 '</div>'
 
                 // Color the timeleft column if active or depleted
                 let timeleftColumn = document.getElementById('swt-timeleft-' + rule.id);
+                if (!rule.isEnabled) {
+                    timeleftColumn.classList.add('text-decoration-line-through');
+                }
                 if (rule.timeLeftSeconds < 1) {
                     timeleftColumn.classList.add('rule-depleted');
                 }
@@ -71,6 +74,7 @@ function populateRuleset() {
         createEditListeners();
         createDeleteListeners();
         createPriorityListeners();
+        createEnableListeners();
     })
 }
 
@@ -147,8 +151,13 @@ function createPriorityListeners() {
 
 /* Listeners for isEnabled checkboxes */
 function createEnableListeners() {
-    // TODO
-    document.querySelector();
+    let buttons = document.querySelectorAll('.enable-rule');
+    for (let button of buttons) {
+        let id = button.parentNode.parentNode.parentNode.id.match(/\d+/)[0];
+        button.addEventListener('click', (e) => {
+            ruleStatusChanged(e.target.checked, id);
+        })
+    }
 }
 
 /* Listeners for edit buttons */
