@@ -99,13 +99,18 @@ async function editPriority(id, change) {
     }
 
     await storeRule(id, rules[id]);
-    // TODO: send message that priority changed
+    await recheckTabRules();
     populateRuleset();
 }
 
 /* Stores the passed <rule> object in storage, with key <id> */
 async function storeRule(id, rule) {
     await browser.runtime.sendMessage({request: 'storeRule', ruleId: id, ruleObject: rule});
+}
+
+/* Forces a recheck on the current tab and its rules */
+async function recheckTabRules() {
+    await browser.runtime.sendMessage({request: 'recheckTabRules'});
 }
 
 /* Deletes a rule specified by its id */
@@ -125,6 +130,7 @@ async function deleteRule(id, force) {
         }
     }
 
+    await recheckTabRules();
     populateRuleset();
 }
 
@@ -207,6 +213,7 @@ async function saveSettings() {
     }
 
     changesMade = false;
+    await recheckTabRules();
     populateRuleset();
     closeSettings();
 }

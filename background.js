@@ -11,15 +11,16 @@ browser.runtime.onMessage.addListener(
             case 'startTimer':
                 startTimer(message.seconds, message.ruleId);
                 break;
-            case 'stopTimer':
-                stopTimer();
-                break;
+            case 'recheckTabRules':
+                tabHandler();
+                return true;
             case 'getActiveRules':
                 return activeRules;
             case 'storeRule':
                 await storeRule(message.ruleId, message.ruleObject);
-                break;
+                return true;
             default:
+                return false;
         }
     }
 )
@@ -91,14 +92,18 @@ function tabHandler() {
     browser.tabs.query({currentWindow: true, active: true})
         .then(async function(tabs) {
             let rules = await getRulesByUrl(tabs[0].url);
+            activeTabId = tabs[0].id;
 
             // No rule for this website, no action needed
             if (!rules || rules.length < 1) {
                 activeRules = null;
+
+                // In case rule is deleted/deactivated while we're blocked
+                removeBlockingOverlay();
                 return;
             }
 
-            activeTabId = tabs[0].id;
+            
             activeRules = rules;
 
             // Inject our CSS into the currently active tab
@@ -151,6 +156,12 @@ function intervalSync() {
 
 /* Main interval function, called by intervalSync every UPDATE_INTERVAL_SECONDS */
 async function countdownTimer() {
+    /* If all rules are deleted while we're on an affected website, remove timer/overlay */
+    if (!activeRules) {
+        updateUI(null, 'delete', activeTabId);
+        stopTimer();
+        return;
+    }
     // Update all active timers in storage
     for (let activeRule of activeRules) {
         if (activeRule.timeLeft > 0) {
@@ -167,6 +178,7 @@ async function countdownTimer() {
     // Time has run out - create blocking overlay, stop timer
     if (activeRules[0].timeLeft <= 0) {
         createBlockingOverlay();
+        updateUI(null, 'delete', activeTabId);
         stopTimer();
         return;
     }
