@@ -1,3 +1,5 @@
+let updateInterval;
+
 /* When the user opens the popup */
 document.addEventListener('DOMContentLoaded', function() {
     populateRuleset();
@@ -99,7 +101,7 @@ async function setActiveRuleClasses() {
 
 /* While popup is open, keep updating the time left of the active rule */
 function updateTimeleft() {
-    let updateInterval = setInterval(
+    updateInterval = setInterval(
         async function () {
             let activeRules = await browser.runtime.sendMessage({request: 'getActiveRules'});
 
@@ -116,7 +118,7 @@ function updateTimeleft() {
                 }
             }
             else {
-                clearInterval(updateInterval);
+                updateInterval = clearInterval(updateInterval);
             }
         }, 1000
     )

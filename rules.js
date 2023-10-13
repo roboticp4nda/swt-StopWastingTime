@@ -214,6 +214,9 @@ async function saveSettings() {
 
     changesMade = false;
     await recheckTabRules();
+    if (!updateInterval) {
+        updateTimeleft();
+    }
     populateRuleset();
     closeSettings();
 }
