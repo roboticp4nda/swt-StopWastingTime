@@ -5,7 +5,7 @@
     position: fixed;
     text-align: center;
     width: 100%;
-    z-index: 99999 !important;
+    z-index: 13333337 !important;
     top: 0;
     left: 0;
 }
@@ -21,10 +21,26 @@
 }
 
 #swt-timer {
-    border: 1px solid;
-    width: 10%;
+    z-index: 1333337 !important;
     position: fixed;
-    right: 0px;
+    right: 2px;
     top: 200px;
-    z-index: 999 !important;
+    background-color: #311 !important;
+    color: #cdc !important;
+    border: 1px solid #800;
+    font-size: 4em !important;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: bold !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    line-height: normal !important;
+    padding: 5px 0;
+    opacity: 0.4;
+}
+
+#swt-timer:hover {
+    cursor: default;
+}
+
+.dragging {
+    cursor: move !important;
 }

@@ -4,6 +4,22 @@ let activeRules;
 let activeTabId;
 let intervalLastFireDate;
 
+/*browser.runtime.onInstalled.addListener(
+    async function () {
+        const contentScript = {
+            id: "contentScript",
+            js: ["content.js"],
+            matches: ["*://**"],
+          };
+
+        try {
+            await browser.scripting.registerContentScripts([contentScript]);
+          } catch (err) {
+            console.error(`failed to register content scripts: ${err}`);
+          }
+    }
+)*/
+
 /* When getting an action event via popup.js */
 browser.runtime.onMessage.addListener(
     async function(message) {
@@ -99,7 +115,6 @@ function tabHandler() {
                 removeBlockingOverlay();
                 return;
             }
-
             
             activeRules = rules;
 
@@ -117,6 +132,19 @@ function tabHandler() {
             else {
                 createBlockingOverlay();
             }
+
+            // Inject content JS - this only fires once, so we need to constantly update our timerDiv on subsequent tab updates
+            await browser.scripting.executeScript({
+                files: ['content.js'],
+                target: {tabId: activeTabId}
+            });
+            
+            browser.scripting.executeScript({
+                func: () => {
+                    addDragEventListeners(document.getElementById('swt-timer'));
+                },
+                target: {tabId: activeTabId}
+            })
         })
 }
 
@@ -189,6 +217,7 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
             const timerDiv = document.createElement('div');
             timerDiv.id = 'swt-timer';
             timerDiv.innerHTML = timeLeftFormatted;
+            timerDiv.onselectstart = () => {return false};
             document.body.appendChild(timerDiv);
         }
         else {
