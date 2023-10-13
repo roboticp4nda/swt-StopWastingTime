@@ -16,7 +16,7 @@ async function createNewRule(ruleName, allocatedTime, blockList, exceptList) {
     id = await getNextId();
     await browser.storage.local.set({'nextId': (id + 1)});
 
-    let priority = await getTotalRules();
+    let totalRules = await getTotalRules();
 
     let rule = {
         'id': id,
@@ -27,10 +27,11 @@ async function createNewRule(ruleName, allocatedTime, blockList, exceptList) {
         'timeLeftSeconds': allocatedTime * 60,
         'isEnabled': true,
         'lastReset': new Date().setHours(0,0,0,0),
-        'priority': priority,
+        'priority': totalRules,
     }
 
     await storeRule(id, rule);
+    await setTotalRules(totalRules + 1);
 }
 
 /* Edits the rule specified in global variable <ruleBeingEdited> with new values from form */
@@ -70,7 +71,7 @@ async function editPriority(id, change) {
                 return;
             }
             for (let rule in rules) {
-                if (rules[rule].priority == oldPriority - 1) {
+                if (!isNaN(rule) && rules[rule].priority == oldPriority - 1) {
                     rules[rule].priority = oldPriority;
                     await storeRule(rules[rule].id, rules[rule]);
                     break;
@@ -86,7 +87,7 @@ async function editPriority(id, change) {
                 return;
             }
             for (let rule in rules) {
-                if (rules[rule].priority == oldPriority + 1) {
+                if (!isNaN(rule) && rules[rule].priority == oldPriority + 1) {
                     rules[rule].priority = oldPriority;
                     await storeRule(rules[rule].id, rules[rule]);
                     break;
@@ -120,11 +121,14 @@ async function deleteRule(id, force) {
     }
     let deletedPriority = await browser.storage.local.get(id).then((rule) => {return rule[id].priority});
     await browser.storage.local.remove(id);
+
+    // Update the 'totalRules' object
+    getTotalRules().then((num => {setTotalRules(num-1)}));
     
     // Move all priorities one up to cover the deleted one
     let rules = await browser.storage.local.get();
     for (let rule in rules) {
-        if (rules[rule].priority > deletedPriority) {
+        if (!isNaN(rule) && rules[rule].priority > deletedPriority) {
             rules[rule].priority -= 1;
             storeRule(rule, rules[rule]);
         }
@@ -163,8 +167,16 @@ function confirmAction(action) {
  * Used to calculate the next default priority 
  */
 async function getTotalRules() {
-    let rules = await browser.storage.local.get();
-    return Math.max(Object.keys(rules).length - 1, 0);
+    let response = await browser.storage.local.get('totalRules');
+    if (isEmptyObj(response)) {
+        return 0;
+    }
+    return response['totalRules'];
+}
+
+/* Sets the totalRules storage object */
+async function setTotalRules(num) {
+    await browser.storage.local.set({'totalRules': num})
 }
 
 /* Gets the next available id in storage */
@@ -173,7 +185,7 @@ async function getNextId() {
 
     // If nextId is not defined yet, means we have no rules, we initialize the id at 0
     if (isEmptyObj(id)) {
-        await browser.storage.local.set({'nextId': 0})
+        await browser.storage.local.set({'nextId': 0, 'totalRules': 0})
         id = 0;
     }
     else {
@@ -235,7 +247,6 @@ async function saveSettings() {
 function openSettings(header, id) {
     changesMade = false;
     if (id) {
-        // TODO: Stop timer?
         browser.storage.local.get(id)
         .then((rule) => {
             document.getElementById('input-name').value = rule[id].name;
@@ -266,7 +277,6 @@ function openSettings(header, id) {
 /* Navigate back to the main page, remove the add/edit page from view */
 function closeSettings() {
     if (changesMade) {
-        // TODO: Resume timer?
         // Don't close if user isn't finished
         if (!confirmAction('cancel')) {
             return;

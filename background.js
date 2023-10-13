@@ -8,9 +8,6 @@ let intervalLastFireDate;
 browser.runtime.onMessage.addListener(
     async function(message) {
         switch (message.request) {
-            case 'startTimer':
-                startTimer(message.seconds, message.ruleId);
-                break;
             case 'recheckTabRules':
                 tabHandler();
                 return true;
