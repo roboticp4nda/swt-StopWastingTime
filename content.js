@@ -49,6 +49,10 @@ function addDragEventListeners(element) {
 
     // While dragging
     timerDiv.addEventListener('mousedown', (e) => {
+        // No action on right-click (only left click and middle click)
+        if (e.button === 2) {
+            return;
+        }
         // Remove text selection on the entire page
         document.onselectstart = function() {return false;};
 
@@ -75,6 +79,14 @@ function addDragEventListeners(element) {
     });
 }
 
+/* Custom context menu */
+function createCustomContextMenu(element) {
+    timerDiv = element;
+
+    timerDiv.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    })
+}
 
 /* Set opacity of timer div */
 // TODO

@@ -1,4 +1,5 @@
 const UPDATE_INTERVAL_SECONDS = 1;
+const DEFAULT_TIMER_OPACITY = 0.4;
 let timer = null;
 let activeRules;
 let activeTabId;
@@ -12,6 +13,9 @@ let intervalLastFireDate;
 browser.runtime.onMessage.addListener(
     async function(message) {
         switch (message.request) {
+            case 'changeTimerVisibility':
+                changeActiveTimerVisibility(message.status);
+                return true;
             case 'storeTimerPosition':
                 storeTimerPosition(message.right, message.top);
                 return true;
@@ -81,12 +85,17 @@ browser.tabs.onRemoved.addListener(
             stopTimer();
         }
         else {
-            browser.tabs.query({currentWindow: true, active: true})
-            .then((tabs) => {
-                if (tabs[0].id == tabId) {
-                    stopTimer();
-                }
-            })
+            try {
+                browser.tabs.query({currentWindow: true, active: true})
+                .then((tabs) => {
+                    if (tabs[0].id == tabId) {
+                        stopTimer();
+                    }
+                })
+            } catch (e) {
+                console.log(e);
+                return e;
+            }
         }
     }
 )
@@ -132,11 +141,13 @@ function tabHandler() {
 
             browser.scripting.executeScript({
                 func: () => {
-                    addDragEventListeners(document.getElementById('swt-timer'));
+                    let timerDiv = document.getElementById('swt-timer')
+                    addDragEventListeners(timerDiv);
+                    createCustomContextMenu(timerDiv);
                 },
                 target: {tabId: activeTabId}
-            })
-        })
+            });
+        });
 }
 
 /* Starts the timer/sets up the interval for the specified rules */
@@ -204,6 +215,9 @@ async function countdownTimer() {
 /* Updates the timer UI with the current time left */
 function updateUI(timeLeftFormatted, action, previousTabId) {
     function createOrUpdateTimerUI(timeLeftFormatted) {
+        const DEFAULT_TIMER_OPACITY = 0.4;
+
+        // Create timer UI
         if (!document.getElementById('swt-timer')) {
             const timerDiv = document.createElement('div');
             timerDiv.id = 'swt-timer';
@@ -211,13 +225,9 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
             timerDiv.onselectstart = () => {return false};
             document.body.appendChild(timerDiv);
 
-            // Custom location if the user has previously moved it
+            // Sets position to the saved location if the user has previously moved it
             browser.storage.local.get('timerPosition')
             .then((response) => {
-                function isEmptyObj(obj) {
-                    return Object.keys(obj).length === 0 && obj.constructor === Object;
-                }
-                
                 // Make sure that the object is not out of bounds on the new webpage //
                 function checkValidPosition(response) {
                     response = response['timerPosition'];
@@ -251,9 +261,34 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
                     }
                 });
             })
+
+            // Sets opacity to saved setting, default if user hasn't changed, or 0 if hidden
+            browser.storage.local.get('timerVisible').then(
+                (response) => {
+                    let opacity = DEFAULT_TIMER_OPACITY;
+                    if (!response['timerVisible']) {
+                        opacity = 0;
+                    }
+                    else {
+                        browser.storage.local.get('opacity')
+                        .then((response) => {
+                            if (!isEmptyObj(response)) {
+                                opacity = response['opacity'];
+                            }
+                            timerDiv.style.opacity = opacity;
+                        });
+                    }
+                }
+            )
         }
+
+        // Update already existing timer UI with new value
         else {
             document.getElementById('swt-timer').innerHTML = timeLeftFormatted;
+        }
+
+        function isEmptyObj(obj) {
+            return Object.keys(obj).length === 0 && obj.constructor === Object;
         }
     }
 
@@ -419,4 +454,26 @@ function resetRule(rule) {
 /* Stores the position of the timer if the user has moved it */
 async function storeTimerPosition(right, top) {
     await browser.storage.local.set({'timerPosition': {'right': right, 'top': top}})
+}
+
+async function changeActiveTimerVisibility(visibility) {
+    let opacity = 0;
+    if (visibility === 'visible') {
+        response = await browser.storage.local.get('opacity');
+        if (!isEmptyObj(response)) {
+            opacity = response['opacity'];
+        }
+        else {
+            opacity = DEFAULT_TIMER_OPACITY;
+        }
+    }
+    
+    browser.scripting.executeScript({
+        func: (opacity) => {
+            let timerDiv = document.getElementById('swt-timer');
+            timerDiv.style.opacity = opacity;
+        },
+        args: [opacity],
+        target: {tabId: activeTabId}
+    });
 }

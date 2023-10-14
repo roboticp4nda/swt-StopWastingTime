@@ -4,6 +4,7 @@ let updateInterval;
 document.addEventListener('DOMContentLoaded', function() {
     populateRuleset();
     updateTimeleft();
+    timerVisibilityHandler();
 })
 
 /* Checks if an object is empty, localStorage returns such if the key in .get(key) is not found
@@ -40,6 +41,12 @@ function populateRuleset() {
                 // Ignore any non-numeric keys such as 'nextId'
                 if (!isNaN(item)) {
                     rules.push(storageItems[item]);
+                }
+
+                // Update the Show Timer toggle
+                else if (item == 'timerVisible') {
+                    let timerVisible = storageItems[item];
+                    document.getElementById('timer-visibility-switch').checked = timerVisible;
                 }
             }
         }
@@ -126,6 +133,22 @@ function updateTimeleft() {
             }
         }, 1000
     )
+}
+
+/* Handler for the 'Show Timer' visibility toggle */
+function timerVisibilityHandler(isVisible) {
+    document.getElementById('timer-visibility-switch')
+    .addEventListener('click', async function(e) {
+        if (e.target.checked) {
+            await browser.storage.local.set({'timerVisible': true})
+            await browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'visible'});
+        }
+        else {
+            await browser.storage.local.set({'timerVisible': false})
+            await browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'invisible'});
+        }
+        
+    });
 }
 
 /* Listeners for priority buttons */

@@ -34,7 +34,7 @@
     font-family: 'Courier New', Courier, monospace !important;
     line-height: normal !important;
     padding: 5px 0;
-    opacity: 0.4;
+    opacity: 0;
 }
 
 #swt-timer:hover {
