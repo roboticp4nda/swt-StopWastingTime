@@ -44,6 +44,9 @@ async function editRule(ruleName, allocatedTime, blockList, exceptList) {
 
     // Update the time left by calculating difference
     if (rule.timeAllocatedMinutes != allocatedTime) {
+        // Update rule.timeLeftSeconds before we update, as it might've changed since opening settings
+        updatedTimeLeftSeconds = await browser.storage.local.get(id.toString());
+        rule.timeLeftSeconds = updatedTimeLeftSeconds[id].timeLeftSeconds;
         rule.timeLeftSeconds = Math.max(
             rule.timeLeftSeconds - ((rule.timeAllocatedMinutes - allocatedTime) * 60), 0
         );
