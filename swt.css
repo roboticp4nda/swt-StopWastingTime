@@ -34,7 +34,8 @@
     font-family: 'Courier New', Courier, monospace !important;
     line-height: normal !important;
     padding: 5px 0;
-    opacity: 0;
+    opacity: 0.4;
+    visibility: hidden;
 }
 
 #swt-timer:hover {
@@ -43,4 +44,52 @@
 
 .dragging {
     cursor: move !important;
+}
+
+#swt-custom-context-menu {
+    /*display: none;*/
+    width: 120px;
+    border: 1px solid rgb(117, 116, 122);
+    border-radius: 5px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(43, 42, 51);
+    color: #fff;
+    padding-bottom: 3px;
+    z-index: 1333338;
+    cursor: default;
+}
+
+.custom-context-menu-list {
+    margin: 5px 0 0 0;
+    list-style-type: none;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+.custom-context-menu-item {
+    padding: 5px;
+}
+
+.custom-context-menu-item:hover {
+    background-color: rgb(82, 82, 94);
+}
+
+.custom-context-menu-line {
+    margin: 5px auto;
+    width: 90%;
+    height: 0px;
+    border: 1px solid rgb(117, 116, 122);
+}
+
+.custom-context-menu-label {
+    padding: 5px;
+}
+
+.slider {
+    width: 95%;
+    height: 10px; 
+    background: #d3d3d3; 
+    cursor: pointer; 
 }

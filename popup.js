@@ -140,12 +140,10 @@ function timerVisibilityHandler(isVisible) {
     document.getElementById('timer-visibility-switch')
     .addEventListener('click', async function(e) {
         if (e.target.checked) {
-            await browser.storage.local.set({'timerVisible': true})
             await browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'visible'});
         }
         else {
-            await browser.storage.local.set({'timerVisible': false})
-            await browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'invisible'});
+            await browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'hidden'});
         }
         
     });

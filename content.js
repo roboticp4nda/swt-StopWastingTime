@@ -1,4 +1,5 @@
 let timerDiv;
+const DEFAULT_TIMER_OPACITY = 0.4;
 
 /* Move the timer div when dragging */
 function dragElement({movementX, movementY}) {
@@ -49,8 +50,9 @@ function addDragEventListeners(element) {
 
     // While dragging
     timerDiv.addEventListener('mousedown', (e) => {
-        // No action on right-click (only left click and middle click)
+        // Open custom context menu on right-click
         if (e.button === 2) {
+            createCustomContextMenu(timerDiv, e);
             return;
         }
         // Remove text selection on the entire page
@@ -79,14 +81,110 @@ function addDragEventListeners(element) {
     });
 }
 
-/* Custom context menu */
-function createCustomContextMenu(element) {
+/* Remove default context menu on timer div */
+function removeDefaultContextMenu(element) {
     timerDiv = element;
-
     timerDiv.addEventListener('contextmenu', (e) => {
         e.preventDefault();
-    })
+    });
+}
+
+/* Create and display the custom context menu on the timer */
+function createCustomContextMenu(timerDiv, e) {
+    let contextMenu = document.getElementById('swt-custom-context-menu')
+
+    // Create menu
+    if (!contextMenu) {
+        contextMenu = document.createElement('div');
+        contextMenu.id = 'swt-custom-context-menu';
+        contextMenu.innerHTML = 
+        '<ul class="custom-context-menu-list">' +
+        '<li class="custom-context-menu-item" id="swt-hide-timer">Hide Timer</li>' +
+        '<li class="custom-context-menu-line"></li>' +
+        '<li class="custom-context-menu-label">Opacity:</li>' +
+        '<li class="custom-context-menu-item"><input type="range" min="10" max="100" value="40" class="slider" id="swt-opacity-slider"></li>' +
+        '</ul>'
+        contextMenu.onselectstart = () => {return false};
+        document.body.appendChild(contextMenu);
+        
+        // Remove default context menu from the menu
+        contextMenu.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        // Listener for opacity change, mouseup so it only fires when the user stops input
+        let slider = document.getElementById('swt-opacity-slider')
+        slider.addEventListener('mouseup', (e) => {
+            changeOpacity(e.target.value, timerDiv);
+        })
+
+        // Set the current (saved) opacity value on the slider
+        getSavedOpacity().then(
+            (opacity) => {
+                slider.value = opacity * 100;
+            }
+        )
+    }
+
+    // Display menu
+    contextMenu.style.display = 'initial';
+
+    // If the context menu would go out of bounds, display it to the left/top of pointer instead of right/bottom
+    let leftPos = e.clientX;
+    if (leftPos + contextMenu.clientWidth > document.body.clientWidth) {
+        leftPos = (leftPos - contextMenu.clientWidth);
+    }
+
+    let topPos = e.clientY
+    if (topPos + contextMenu.clientHeight > document.body.clientHeight) {
+        topPos = (topPos - contextMenu.clientHeight);
+    }
+    contextMenu.style.left = leftPos + 'px';
+    contextMenu.style.top = topPos + 'px';
+
+    // Listener for close menu
+    document.addEventListener('mousedown', (e) => {
+        // Don't close if the user is just opening the context menu via right-click
+        if (e.button === 2 && e.target.id === timerDiv.id) return;
+
+        // Change opacity via slider
+        if (e.target.id === 'swt-opacity-slider') {
+            // We handle this in a separate mouseup handler
+            return;
+        }
+
+        // Hide the timer
+        else if (e.target.id === 'swt-hide-timer' && e.button !== 2) {
+            browser.runtime.sendMessage({request: 'changeTimerVisibility', status: 'hidden'});
+        }
+
+        // Don't close if the user clicks inside the context menu
+        else if (e.target.id === 'swt-custom-context-menu' || e.target.offsetParent.id === 'swt-custom-context-menu') {
+            return;
+        }
+
+        // Close the menu
+        contextMenu.style.display = 'none';
+        document.removeEventListener('mousedown', this);
+    });
+
 }
 
 /* Set opacity of timer div */
-// TODO
+async function changeOpacity(opacity, timerDiv) {
+    opacity = opacity / 100;
+    timerDiv.style.opacity = opacity;
+    await browser.storage.local.set({'opacity': opacity})
+}
+
+async function getSavedOpacity() {
+    response = await browser.storage.local.get('opacity');
+    if (!isEmptyObj(response)) {
+        return response['opacity']
+    }
+    return DEFAULT_TIMER_OPACITY = 0.4;
+}
+
+function isEmptyObj(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+}

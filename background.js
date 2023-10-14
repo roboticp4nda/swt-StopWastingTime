@@ -1,5 +1,4 @@
 const UPDATE_INTERVAL_SECONDS = 1;
-const DEFAULT_TIMER_OPACITY = 0.4;
 let timer = null;
 let activeRules;
 let activeTabId;
@@ -143,7 +142,7 @@ function tabHandler() {
                 func: () => {
                     let timerDiv = document.getElementById('swt-timer')
                     addDragEventListeners(timerDiv);
-                    createCustomContextMenu(timerDiv);
+                    removeDefaultContextMenu(timerDiv);
                 },
                 target: {tabId: activeTabId}
             });
@@ -262,24 +261,29 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
                 });
             })
 
-            // Sets opacity to saved setting, default if user hasn't changed, or 0 if hidden
-            browser.storage.local.get('timerVisible').then(
-                (response) => {
-                    let opacity = DEFAULT_TIMER_OPACITY;
-                    if (!response['timerVisible']) {
-                        opacity = 0;
-                    }
-                    else {
-                        browser.storage.local.get('opacity')
-                        .then((response) => {
-                            if (!isEmptyObj(response)) {
-                                opacity = response['opacity'];
-                            }
-                            timerDiv.style.opacity = opacity;
-                        });
-                    }
+            // Sets opacity to saved setting
+            browser.storage.local.get('opacity')
+            .then((response) => {
+                let opacity = DEFAULT_TIMER_OPACITY;
+                if (!isEmptyObj(response)) {
+                    opacity = response['opacity'];
                 }
-            )
+                timerDiv.style.opacity = opacity;
+            })
+
+            // Unhides timer based on setting
+            .then(() => {
+                browser.storage.local.get('timerVisible').then(
+                    (response) => {
+                        let visibility = true;
+                        if (!isEmptyObj(response)) {
+                            visibility = response['timerVisible'];
+                        }
+                        if (visibility) {
+                            timerDiv.style.visibility = 'visible';
+                        }
+                })
+            })
         }
 
         // Update already existing timer UI with new value
@@ -295,7 +299,8 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
     function deleteTimerUI() {
         const timerDiv = document.getElementById('swt-timer')
         if (timerDiv) {
-            document.getElementById('swt-timer').remove();
+            timerDiv.remove();
+            document.getElementById('swt-custom-context-menu').remove();
         }
     }
 
@@ -433,7 +438,7 @@ async function storeRule(id, rule) {
 
 /* Checks if an object is empty, localStorage returns such if the key in .get(key) is not found
  * https://stackoverflow.com/a/68636342 */
- function isEmptyObj(obj) {
+function isEmptyObj(obj) {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
 
@@ -457,23 +462,20 @@ async function storeTimerPosition(right, top) {
 }
 
 async function changeActiveTimerVisibility(visibility) {
-    let opacity = 0;
     if (visibility === 'visible') {
-        response = await browser.storage.local.get('opacity');
-        if (!isEmptyObj(response)) {
-            opacity = response['opacity'];
-        }
-        else {
-            opacity = DEFAULT_TIMER_OPACITY;
-        }
+        await browser.storage.local.set({'timerVisible': true});
+    }
+    else {
+        visibility = 'hidden';
+        await browser.storage.local.set({'timerVisible': false});
     }
     
     browser.scripting.executeScript({
-        func: (opacity) => {
+        func: (visibility) => {
             let timerDiv = document.getElementById('swt-timer');
-            timerDiv.style.opacity = opacity;
+            timerDiv.style.visibility = visibility;
         },
-        args: [opacity],
+        args: [visibility],
         target: {tabId: activeTabId}
     });
 }

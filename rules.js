@@ -46,8 +46,8 @@ async function editRule(ruleName, allocatedTime, blockList, exceptList) {
     if (rule.timeAllocatedMinutes != allocatedTime) {
         rule.timeLeftSeconds = Math.max(
             rule.timeLeftSeconds - ((rule.timeAllocatedMinutes - allocatedTime) * 60), 0
-        )
-        rule.timeAllocatedMinutes = allocatedTime
+        );
+        rule.timeAllocatedMinutes = allocatedTime;
     }
 
     // Update the lists
