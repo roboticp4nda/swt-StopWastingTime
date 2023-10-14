@@ -5,25 +5,16 @@ let activeTabId;
 let intervalLastFireDate;
 
 /*browser.runtime.onInstalled.addListener(
-    async function () {
-        const contentScript = {
-            id: "contentScript",
-            js: ["content.js"],
-            matches: ["*://**"],
-          };
-
-        try {
-            await browser.scripting.registerContentScripts([contentScript]);
-          } catch (err) {
-            console.error(`failed to register content scripts: ${err}`);
-          }
-    }
+    
 )*/
 
 /* When getting an action event via popup.js */
 browser.runtime.onMessage.addListener(
     async function(message) {
         switch (message.request) {
+            case 'storeTimerPosition':
+                storeTimerPosition(message.right, message.top);
+                return true;
             case 'recheckTabRules':
                 tabHandler();
                 return true;
@@ -138,7 +129,7 @@ function tabHandler() {
                 files: ['content.js'],
                 target: {tabId: activeTabId}
             });
-            
+
             browser.scripting.executeScript({
                 func: () => {
                     addDragEventListeners(document.getElementById('swt-timer'));
@@ -219,6 +210,47 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
             timerDiv.innerHTML = timeLeftFormatted;
             timerDiv.onselectstart = () => {return false};
             document.body.appendChild(timerDiv);
+
+            // Custom location if the user has previously moved it
+            browser.storage.local.get('timerPosition')
+            .then((response) => {
+                function isEmptyObj(obj) {
+                    return Object.keys(obj).length === 0 && obj.constructor === Object;
+                }
+                
+                // Make sure that the object is not out of bounds on the new webpage //
+                function checkValidPosition(response) {
+                    response = response['timerPosition'];
+                    // We also extract <num>px from storage into an integer
+                    timerDiv.style.right = Math.min(
+                        Math.min(Math.min(document.body.clientWidth, window.innerWidth) - timerDiv.clientWidth),
+                        Math.max(0, parseInt(response.right.match(/\d+/)[0]))
+                    ) + 'px';
+    
+                    timerDiv.style.top = Math.min(
+                        Math.min(Math.min(document.body.clientHeight, window.innerHeight) - timerDiv.clientHeight),
+                        Math.max(0, parseInt(response.top.match(/\d+/)[0]))
+                    ) + 'px';
+
+                    // If the timer has moved due to resize/force move, save the new position
+                    // Disabled for now
+                    /*if (timerDiv.style.right != response.right || timerDiv.style.top != response.top) {
+                        browser.runtime.sendMessage({request: 'storeTimerPosition', 'right': timerDiv.style.right, 'top': timerDiv.style.top});
+                    }*/
+                }
+
+                if (!isEmptyObj(response)) {
+                    checkValidPosition(response);
+                }
+
+                // Also check position each time the window gets resized
+                window.addEventListener('resize', async function() {
+                    let response = await browser.storage.local.get('timerPosition');
+                    if (!isEmptyObj(response)) {
+                        checkValidPosition(response);
+                    }
+                });
+            })
         }
         else {
             document.getElementById('swt-timer').innerHTML = timeLeftFormatted;
@@ -382,4 +414,9 @@ function resetRule(rule) {
     }
 
     return rule;
+}
+
+/* Stores the position of the timer if the user has moved it */
+async function storeTimerPosition(right, top) {
+    await browser.storage.local.set({'timerPosition': {'right': right, 'top': top}})
 }
