@@ -7,15 +7,22 @@
     "action": {
         "default_icon": {
             "16": "assets/icon.png",
-            "24": "assets/icon.png",
-            "32": "assets/icon.png"
+            "32": "assets/icon.png",
+            "64": "assets/icon.png",
+            "128": "assets/icon.png"
         },
-        "default_title": "Stop Wasting Time!"
+        "default_title": "Stop Wasting Time!",
+        "default_area": "navbar"
     },
     "background": {
         "scripts": ["background.js"]
     },
     "host_permissions": [
         "<all_urls>"
-    ]
+    ],
+    "icons": {
+        "48": "assets/icon.png",
+        "96": "assets/icon.png"
+      }
+      
 }
