@@ -386,6 +386,10 @@ async function getRulesByUrl(url) {
     if (!url) {
         return null;
     }
+
+    // Convert url to lowercase, as that's how we store the lists
+    url = url.toLowerCase();
+
     /* Iterate through an array to see if any of them match the url */
     function hasMatch(array, url) {
         for (let s of array) {
