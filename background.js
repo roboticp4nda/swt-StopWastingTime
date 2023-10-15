@@ -4,9 +4,19 @@ let activeRules;
 let activeTabId;
 let intervalLastFireDate;
 
-/*browser.runtime.onInstalled.addListener(
-    
-)*/
+
+/* When extension icon is clicked */
+browser.action.onClicked.addListener(async function(tab) {
+    // Request permission for all urls if not given yet
+    let hasHostPerms = await browser.permissions.request({
+      origins: ['<all_urls>']
+    })
+
+    // Open the popup if permission was granted
+    if (hasHostPerms) {
+        browser.action.setPopup({popup: browser.runtime.getURL('popup.html')})
+    }
+});
 
 /* When getting an action event via popup.js */
 browser.runtime.onMessage.addListener(

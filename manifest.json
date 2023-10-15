@@ -10,13 +10,12 @@
             "24": "assets/icon.png",
             "32": "assets/icon.png"
         },
-        "default_title": "Stop Wasting Time!",
-        "default_popup": "popup.html"
+        "default_title": "Stop Wasting Time!"
     },
     "background": {
         "scripts": ["background.js"]
     },
     "host_permissions": [
-        "*://*/*"
+        "<all_urls>"
     ]
 }
