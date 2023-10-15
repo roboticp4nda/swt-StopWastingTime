@@ -23,6 +23,10 @@
     "icons": {
         "48": "assets/icon.png",
         "96": "assets/icon.png"
-      }
-      
+      },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "c3d0LXN0b3B3YXN0aW5ndGltZQ@roboticpandadev"
+        }
+    }
 }
