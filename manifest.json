@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "SWT - Stop Wasting Time",
-    "description": "Boost your productivity by self-imposing limits on your time spent visiting websites each day. Customize the rules and allotted time for various websites or website groups as you see fit!",
+    "description": "Boost your productivity! Set limits on how much time you can spend on specified websites each day. Customize the rules and allotted time as you see fit!",
     "version": "1.0",
     "permissions": ["storage", "activeTab", "scripting"],
     "action": {
