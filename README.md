@@ -6,12 +6,12 @@ A Firefox browser extension to set how much time per day you can spend on a spec
 
 This extension is designed for Mozilla Firefox and uses Manifest V3. It is not published in the Mozilla Add-ons Library, but you can download and install it from [here](https://github.com/roboticp4nda/swt-StopWastingTime/releases/download/1.0/4d36b427c76a4000be9f-1.0.xpi).
 
-**Step 1:** Download the latest version .xpi here: [Latest Release](https://github.com/roboticp4nda/swt-StopWastingTime/releases/download/1.0/4d36b427c76a4000be9f-1.0.xpi)
-**Step 2:** Go to `about:addons` in Firefox
-**Step 3:** Select the `Extensions` tab on the left
-**Step 4:** Click the gear icon at the top, then select `Install Add-on From File...`
-**Step 5:** Find and open the downloaded .xpi file
-**Step 6:** Done!
+**Step 1:** Download the latest version .xpi here: [Latest Release](https://github.com/roboticp4nda/swt-StopWastingTime/releases/download/1.0/4d36b427c76a4000be9f-1.0.xpi)  
+**Step 2:** Go to `about:addons` in Firefox  
+**Step 3:** Select the `Extensions` tab on the left  
+**Step 4:** Click the gear icon at the top, then select `Install Add-on From File...`  
+**Step 5:** Find and open the downloaded .xpi file  
+**Step 6:** Done!  
 
 ## Use
 
@@ -23,4 +23,6 @@ Timers reset at midnight (active tabs will only reset timer after a refresh or u
 
 ## Permissions
 
-The first time you open the extension, you'll be prompted to give the extension the permission to "Access your data for all websites". This is necessary as the extension will add its own HTML, CSS, and JavaScript into any website that you specify in the rules, in order to display a timer or to create a blocking overlay if your allocated time runs out. The extension does not read or store any of your personal data.
+The first time you open the extension, you'll be prompted to give the extension the permission to "Access your data for all websites". This is necessary as the extension will add its own HTML, CSS, and JavaScript into any website that you specify in the rules, in order to display a timer or to create a blocking overlay if your allocated time runs out.
+
+The extension does not read or store any of your personal data.
