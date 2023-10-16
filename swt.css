@@ -66,6 +66,9 @@
   list-style-type: none;
   font-size: 1.2em;
   text-decoration: none;
+  font-size: 14px !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  padding: 0;
 }
 
 .custom-context-menu-item {
