@@ -4,9 +4,9 @@ A Firefox browser extension to set how much time per day you can spend on a spec
 
 ## Install
 
-This extension is designed for Mozilla Firefox and uses Manifest V3. It is not published in the Mozilla Add-ons Library, but you can download and install it from here.
+This extension is designed for Mozilla Firefox and uses Manifest V3. It is not published in the Mozilla Add-ons Library, but you can download and install it from [here](https://github.com/roboticp4nda/swt-StopWastingTime/releases/download/1.0/4d36b427c76a4000be9f-1.0.xpi).
 
-**Step 1:** Download the latest version .xpi here: 
+**Step 1:** Download the latest version .xpi here: [Latest Release](https://github.com/roboticp4nda/swt-StopWastingTime/releases/download/1.0/4d36b427c76a4000be9f-1.0.xpi)
 **Step 2:** Go to `about:addons` in Firefox
 **Step 3:** Select the `Extensions` tab on the left
 **Step 4:** Click the gear icon at the top, then select `Install Add-on From File...`
