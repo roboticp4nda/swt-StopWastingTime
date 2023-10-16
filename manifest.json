@@ -7,10 +7,11 @@
     "permissions": ["storage", "activeTab", "scripting"],
     "action": {
         "default_icon": {
-            "16": "assets/icon.png",
-            "32": "assets/icon.png",
-            "64": "assets/icon.png",
-            "128": "assets/icon.png"
+            "16": "assets/icon-16.png",
+            "24": "assets/icon-24.png",
+            "32": "assets/icon-32.png",
+            "64": "assets/icon-64.png",
+            "128": "assets/icon-128.png"
         },
         "default_title": "Stop Wasting Time!",
         "default_area": "navbar"
@@ -22,8 +23,8 @@
         "<all_urls>"
     ],
     "icons": {
-        "48": "assets/icon.png",
-        "96": "assets/icon.png"
+        "48": "assets/icon-48.png",
+        "96": "assets/icon-96.png"
       },
     "browser_specific_settings": {
         "gecko": {
