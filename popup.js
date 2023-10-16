@@ -55,17 +55,24 @@ function populateRuleset() {
         function() {
             rules.sort((a, b) => a.priority - b.priority);
             for (let rule of rules) {
+                // If past midnight and the timer hasn't been reset yet, display allocated time instead of time left
+                // Timer will only be reset on next activation/refresh
+                let timeleft = 
+                    new Date().setHours(0,0,0,0) - rule.lastReset > 0 ? 
+                    formatTime(rule.timeAllocatedMinutes * 60) : 
+                    formatTime(rule.timeLeftSeconds);
+
                 rulesetDiv.innerHTML += '<div class="row row-active row-hover align-items-center border-secondary border-top border-opacity-25" id="swt-rule-' + rule.id + '">' +
                 '<div class="col sm fs-3 text-end"><span class="settings-icon increase-priority" role="button">' + (rule.priority > 0 ? '↑' : '') + '</span></div>' +
                 '<div class="col sm fs-3 text-start"><span class="settings-icon decrease-priority" role="button">' + (rule.priority < rules.length-1 ? '↓' : '') + '</span></div>' +
                 '<div class="col-4 text-truncate"><span title="' + rule.name + '">' + rule.name + '</span></div>' +
-                '<div class="col-2 text-center fw-light" id="swt-timeleft-'+ rule.id +'">' + formatTime(rule.timeLeftSeconds) + '</div>' +
+                '<div class="col-2 text-center fw-light" id="swt-timeleft-'+ rule.id +'">' + timeleft + '</div>' +
                 '<div class="col-4 text-center"><span class="d-inline p-2 settings-icon"><input role="button" class="form-check-input enable-rule" type="checkbox" value=""' + (rule.isEnabled ? ' checked' : '') + '></span>' +
                 '<span class="d-inline p-1 settings-icon edit-rule" role="button">' + '⚙' + '</span>' +
                 '<span class="d-inline p-1 settings-icon delete-rule" role="button">' + '🗑️' + '</span></div>' +
                 '</div>'
 
-                // Color the timeleft column if active or depleted
+                // Format the timeleft column if disabled or depleted
                 let timeleftColumn = document.getElementById('swt-timeleft-' + rule.id);
                 if (!rule.isEnabled) {
                     timeleftColumn.classList.add('text-decoration-line-through');
