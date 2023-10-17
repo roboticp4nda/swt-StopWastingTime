@@ -1,5 +1,6 @@
 let timerDiv;
 const DEFAULT_TIMER_OPACITY = 0.4;
+let interval;
 
 /* Move the timer div when dragging */
 function dragElement({ movementX, movementY }) {
@@ -211,3 +212,46 @@ async function getSavedOpacity() {
 function isEmptyObj(obj) {
   return Object.keys(obj).length === 0 && obj.constructor === Object;
 }
+
+/* TEMPORARY SOLUTION
+ * Send a ping to background regularly to prevent it from going to sleep when there is an active timer
+ * Default timeout in Firefox is 30 seconds
+ */
+
+/* Run interval only if the window is visible */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    letBackgroundSleep();
+  } else {
+    keepBackgroundAwake();
+  }
+});
+
+/* On focus gain, set up interval */
+document.addEventListener("focus", () => {
+  keepBackgroundAwake();
+});
+
+/* Set up the interval */
+function keepBackgroundAwake() {
+  if (!interval) {
+    interval = setInterval(async () => {
+      // Remove interval if focus has been lost since the last ping
+      if (!document.hasFocus()) {
+        letBackgroundSleep();
+      }
+      await browser.runtime.sendMessage({ request: "ping" });
+    }, 14000);
+  }
+}
+
+/* Remove interval */
+function letBackgroundSleep() {
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+  }
+}
+
+// Set up the interval by default when the code is first injected
+keepBackgroundAwake();
