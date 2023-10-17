@@ -5,13 +5,13 @@ let activeTabId;
 let intervalLastFireDate;
 
 /* When extension icon is clicked */
-browser.action.onClicked.addListener(async function (tab) {
+browser.action.onClicked.addListener(async function () {
   // Request permission for all urls if not given yet
   let hasHostPerms = await browser.permissions.request({
     origins: ["<all_urls>"],
   });
 
-  // Open the popup if permission was granted
+  // Set the popup if permission was granted
   if (hasHostPerms) {
     browser.action.setPopup({ popup: browser.runtime.getURL("popup.html") });
   }
@@ -33,6 +33,8 @@ browser.runtime.onMessage.addListener(async function (message) {
       return activeRules;
     case "storeRule":
       await storeRule(message.ruleId, message.ruleObject);
+      return true;
+    case "ping":
       return true;
     default:
       return false;
@@ -72,6 +74,14 @@ browser.windows.onFocusChanged.addListener(function (windowId) {
     });
 
     tabHandler();
+  }
+});
+
+/* When a new window is created */
+browser.windows.onCreated.addListener(async function (windowId) {
+  // Set the popup if perms are granted
+  if (await checkPerms()) {
+    browser.action.setPopup({ popup: browser.runtime.getURL("popup.html") });
   }
 });
 
@@ -473,6 +483,7 @@ async function storeTimerPosition(right, top) {
   });
 }
 
+/* Changes the visibility of the timer on the webpage */
 async function changeActiveTimerVisibility(visibility) {
   if (visibility === "visible") {
     await browser.storage.local.set({ timerVisible: true });
@@ -488,5 +499,12 @@ async function changeActiveTimerVisibility(visibility) {
     },
     args: [visibility],
     target: { tabId: activeTabId },
+  });
+}
+
+/* Check if we have the necessary permissions to function */
+async function checkPerms() {
+  return await browser.permissions.contains({
+    origins: ["<all_urls>"],
   });
 }
