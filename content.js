@@ -16,7 +16,7 @@ function dragElement({ movementX, movementY }) {
   if (rightValue > 0) {
     if (
       rightValue + width <
-      Math.min(document.body.clientWidth, window.innerWidth)
+      Math.min(document.documentElement.clientWidth, window.innerWidth)
     ) {
       // Move the div based the mouse movement distance (X axis)
       timerDiv.style.right = rightValue - movementX + "px";
@@ -24,7 +24,7 @@ function dragElement({ movementX, movementY }) {
       // Left boundary (using .style.right) is based on the width of the page and the width of the element
       timerDiv.style.right =
         Math.min(
-          Math.min(document.body.clientWidth, window.innerWidth) - width,
+          Math.min(document.documentElement.clientWidth, window.innerWidth) - width,
           rightValue - movementX
         ) + "px";
     }
@@ -37,7 +37,7 @@ function dragElement({ movementX, movementY }) {
   if (topValue > 0) {
     if (
       topValue + height <
-      Math.min(document.body.clientHeight, window.innerHeight)
+      Math.min(document.documentElement.clientHeight, window.innerHeight)
     ) {
       // Move the div based the mouse movement distance (Y axis)
       timerDiv.style.top = topValue + movementY + "px";
@@ -45,7 +45,7 @@ function dragElement({ movementX, movementY }) {
       // Bottom boundary (using .style.top) is based on the height of the page and the height of the element
       timerDiv.style.top =
         Math.min(
-          Math.min(document.body.clientHeight, window.innerHeight) - height,
+          Math.min(document.documentElement.clientHeight, window.innerHeight) - height,
           topValue + movementY
         ) + "px";
     }
@@ -148,12 +148,12 @@ function createCustomContextMenu(timerDiv, e) {
 
   // If the context menu would go out of bounds, display it to the left/top of pointer instead of right/bottom
   let leftPos = e.clientX;
-  if (leftPos + contextMenu.clientWidth > document.body.clientWidth) {
+  if (leftPos + contextMenu.clientWidth > document.documentElement.clientWidth) {
     leftPos = leftPos - contextMenu.clientWidth;
   }
 
   let topPos = e.clientY;
-  if (topPos + contextMenu.clientHeight > document.body.clientHeight) {
+  if (topPos + contextMenu.clientHeight > document.documentElement.clientHeight) {
     topPos = topPos - contextMenu.clientHeight;
   }
   contextMenu.style.left = leftPos + "px";

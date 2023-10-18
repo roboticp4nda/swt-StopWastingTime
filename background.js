@@ -242,7 +242,7 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
           timerDiv.style.right =
             Math.min(
               Math.min(
-                Math.min(document.body.clientWidth, window.innerWidth) -
+                Math.min(document.documentElement.clientWidth, window.innerWidth) -
                   timerDiv.clientWidth
               ),
               Math.max(0, parseInt(response.right.match(/\d+/)[0]))
@@ -251,7 +251,7 @@ function updateUI(timeLeftFormatted, action, previousTabId) {
           timerDiv.style.top =
             Math.min(
               Math.min(
-                Math.min(document.body.clientHeight, window.innerHeight) -
+                Math.min(document.documentElement.clientHeight, window.innerHeight) -
                   timerDiv.clientHeight
               ),
               Math.max(0, parseInt(response.top.match(/\d+/)[0]))
